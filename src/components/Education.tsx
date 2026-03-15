@@ -7,10 +7,10 @@ import { motion, useInView } from 'framer-motion';
 const milestones = [
   {
     year: '2019 - 2020',
-    title: 'Secondary Education',
+    title: 'Matriculation',
     institution: 'Rose Bud Academy, Khagaria, Bihar',
     description:
-      'Completed schooling with a focus on Science and Mathematics. Developed a strong analytical foundation and first exposure to programming through computer science electives.',
+      'Completed secondary education with a strong academic focus on core subjects including Science and Mathematics. ',
     grade: '88.40%',
     side: 'right' as const,
     icon: '/education/rose-bud.png',
@@ -30,10 +30,10 @@ const milestones = [
   },
   {
     year: '2020 - 2022',
-    title: 'Higher Secondary Education',
+    title: 'Intermediate',
     institution: 'R.B College, Dalsingh Sarai, Bihar',
     description:
-      'Graduated with honours in Computer Science. Specialised in cloud infrastructure and distributed systems. Led the university DevOps club, organising workshops on CI/CD pipelines, containerisation, and infrastructure-as-code.',
+      'Completed higher secondary education in the Science stream, strengthening my understanding of core subjects and preparing for higher studies.',
     grade: '83.00%',
     side: 'left' as const,
     icon: '/education/rb-college.png',
@@ -56,7 +56,7 @@ const milestones = [
     title: 'B.Tech - Computer Science & Engineering',
     institution: 'Lovely Professional University, Phagwara, Punjab',
     description:
-      'Earned AWS Solutions Architect Associate, Terraform Associate, and Certified Kubernetes Administrator (CKA) certifications. Continuously upskilling through hands-on projects and open-source contributions.',
+      'Pursuing a Bachelor’s degree in Computer Science and Engineering while actively building projects and exploring modern technologies in software development, cloud computing, and DevOps practices.',
     grade: 'CGPA 8.29',
     side: 'right' as const,
     icon: '/education/lpu.jpg',

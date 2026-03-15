@@ -319,7 +319,7 @@ export default function Contact() {
               </p>
               <div className="flex gap-3">
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/AashishBhaskar3"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.04] flex items-center justify-center text-white/35 hover:text-white hover:border-white/20 transition-all duration-200"
@@ -330,7 +330,7 @@ export default function Contact() {
                   </svg>
                 </a>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/in/aashishbhaskar/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.04] flex items-center justify-center text-white/35 hover:text-white hover:border-white/20 transition-all duration-200"
