@@ -148,17 +148,21 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
   return (
     <div ref={ref} className="relative grid grid-cols-2 items-center">
 
-      {/* ── Connector line – ROW-level absolute so top-1/2 = same reference as the dot ── */}
-      {/*   z-0 so the dot (z-10) sits ON TOP of the line, giving "line through dot" look   */}
+      {/* ── Connector line – ROW-level absolute                                         ── */}
+      {/*   Extends 10 px INTO the dot on the spine side so it truly passes the diameter.  */}
+      {/*   z-0 so the dot (z-10) renders on top, hiding the overlap behind the circle.    */}
       <div
-        className="absolute top-1/2 h-px w-12 -translate-y-1/2 z-0 pointer-events-none"
+        className="absolute z-0 pointer-events-none"
         style={{
-          // Left card: line goes from card-right-edge (50%-3rem) → spine (50%)
-          // Right card: line goes from spine (50%) → card-left-edge (50%+3rem)
-          left: isLeft ? 'calc(50% - 3rem)' : '50%',
+          height: 1,
+          top: 'calc(50% - 0.5px)',          // exact center – no fractional translate
+          // Left card:  card-right-edge (50% - 3rem) → 10 px past dot center (50% + 10px)
+          // Right card: 10 px before dot center (50% - 10px) → card-left-edge (50% + 3rem)
+          left:  isLeft ? 'calc(50% - 3rem)'       : 'calc(50% - 10px)',
+          width: isLeft ? 'calc(3rem + 10px)'      : 'calc(3rem + 10px)',
           backgroundImage: isLeft
             ? `linear-gradient(to right, transparent 0%, ${accent.connector} 100%)`
-            : `linear-gradient(to left, transparent 0%, ${accent.connector} 100%)`,
+            : `linear-gradient(to left,  transparent 0%, ${accent.connector} 100%)`,
         }}
       />
 
@@ -194,12 +198,17 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         )}
       </div>
 
-      {/* ── Spine dot – z-10 so it renders on top of the connector line ── */}
+      {/* ── Spine dot – z-10 renders on top of the connector                        ── */}
+      {/*   Use calc() instead of Tailwind -translate-x/y so Framer Motion's scale      */}
+      {/*   transform doesn't conflict with a separate CSS translate transform.          */}
+      {/*   left/top position the TOP-LEFT corner; subtracting half the dot size (10px) */}
+      {/*   centres the dot at exactly (50%, 50%) of the row container.                  */}
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={inView ? { scale: 1, opacity: 1 } : {}}
         transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+        className="absolute z-10"
+        style={{ left: 'calc(50% - 10px)', top: 'calc(50% - 10px)' }}
       >
         <div
           className="w-5 h-5 rounded-full bg-[#0a0a0a] flex items-center justify-center border"

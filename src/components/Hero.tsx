@@ -39,16 +39,8 @@ export default function Hero() {
       }
     };
 
-    // Show scroll hint after the first loop completes
-    const onLoop = () => {
-      setScrollHint(true);
-      video.removeEventListener('ended', onLoop);
-    };
-
     video.addEventListener('timeupdate', onTimeUpdate);
-    // `loop` is set on the element; fire once when the first cycle wraps
-    // We detect this via a one-time 'ended' listener before the loop restarts.
-    // We temporarily remove `loop` so `ended` fires, then re-add it.
+    // Temporarily remove `loop` so `ended` fires, then re-add it
     video.loop = false;
     const onEnded = () => {
       setScrollHint(true);
@@ -70,11 +62,6 @@ export default function Hero() {
       style={{ backgroundColor: '#121212' }}
     >
       {/* ── Two-column grid ────────────────────────────────────────────── */}
-      {/*
-        h-screen gives the grid a definite height so lg:h-full on the right
-        column resolves correctly. min-h-screen lets it grow on small screens.
-        No overflow-hidden on the section — nothing should be clipped.
-      */}
       <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] h-screen min-h-screen">
 
         {/* ── Logo — top-left, links to admin portal ─────────────── */}
@@ -174,11 +161,6 @@ export default function Hero() {
         </div>
 
         {/* ── RIGHT — video ──────────────────────────────────────────── */}
-        {/*
-          h-[55vw] gives the stacked column a visible height on mobile.
-          lg:h-full resolves against the grid's definite h-screen on desktop.
-          No overflow-hidden — the video must not be clipped.
-        */}
         <div className="relative w-full h-[55vw] lg:h-full">
           {/* subtle inner vignette on the left edge to blend into the text column */}
           <div
@@ -197,7 +179,6 @@ export default function Hero() {
             className="absolute inset-0 w-full h-full object-cover object-[90%_top]"
             preload="auto"
           >
-            <source src="/animation.webm" type="video/webm" />
             <source src="/animation1.mp4" type="video/mp4" />
           </video>
         </div>
