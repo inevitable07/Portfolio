@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+.next/cache
+out/
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+
+# Env files
+.env*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+
+# Cache
+.cache/
+.eslintcache
+.turbo/
+
+# Vercel
+.vercel/
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
