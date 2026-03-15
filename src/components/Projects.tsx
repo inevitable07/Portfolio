@@ -1,103 +1,174 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion } from 'framer-motion';
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const projects = [
-  {
-    num: '01',
-    title: 'Immersive 3D Gallery',
-    category: 'WebGL / Interaction Design',
-    description:
-      'A real-time 3D gallery powered by custom GLSL shaders. Every scroll triggers a physics-based camera transition between exhibits.',
-    tags: ['Three.js', 'GLSL', 'Next.js', 'R3F'],
-    year: '2025',
-    href: '#',
-    accent: {
-      from: 'from-sky-500/[0.15]',
-      glow: 'hover:shadow-sky-500/[0.12]',
-      border: 'hover:border-sky-500/30',
-      tag: 'text-sky-400',
-      line: 'bg-sky-400',
-    },
-  },
-  {
-    num: '02',
-    title: 'Motion-First App',
-    category: 'UI/UX Engineering',
-    description:
-      'Physics-based micro-interactions and scroll-linked hero sequences. Every element is choreographed to feel alive.',
-    tags: ['Framer Motion', 'React', 'TypeScript', 'Radix UI'],
-    year: '2025',
-    href: '#',
-    accent: {
-      from: 'from-violet-500/[0.15]',
-      glow: 'hover:shadow-violet-500/[0.12]',
-      border: 'hover:border-violet-500/30',
-      tag: 'text-violet-400',
-      line: 'bg-violet-400',
-    },
-  },
-  {
-    num: '03',
-    title: 'E-Commerce Platform',
-    category: 'Full-Stack Development',
-    description:
-      'Edge-rendered storefront with sub-100ms TTFB, AI-powered search, and a checkout flow that converts 2× better than average.',
-    tags: ['Next.js 14', 'Supabase', 'Stripe', 'Vercel'],
-    year: '2024',
-    href: '#',
-    accent: {
-      from: 'from-emerald-500/[0.15]',
-      glow: 'hover:shadow-emerald-500/[0.12]',
-      border: 'hover:border-emerald-500/30',
-      tag: 'text-emerald-400',
-      line: 'bg-emerald-400',
-    },
-  },
-  {
-    num: '04',
-    title: 'Brand Identity System',
-    category: 'Design Systems',
-    description:
-      'End-to-end visual identity: logo, motion guidelines, design tokens, and a 200-component library shipped to production.',
-    tags: ['Figma', 'Storybook', 'Design Tokens'],
-    year: '2024',
-    href: '#',
-    accent: {
-      from: 'from-rose-500/[0.15]',
-      glow: 'hover:shadow-rose-500/[0.12]',
-      border: 'hover:border-rose-500/30',
-      tag: 'text-rose-400',
-      line: 'bg-rose-400',
-    },
-  },
-];
-
-
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import { COLOR_THEMES } from '@/lib/colorThemes';
+import ProjectDetailWindow, { type ProjectData } from '@/components/ProjectDetailWindow';
 
 // ─── Variants ─────────────────────────────────────────────────────────────────
 const fadeUp = {
-  hidden:  { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 32 },
   visible: { opacity: 1, y: 0 },
 };
 
 const stagger = {
-  hidden:  {},
+  hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
-export default function Projects() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+// ─── Icons ────────────────────────────────────────────────────────────────────
+function GitHubIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+    </svg>
+  );
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+function CardSkeleton() {
+  return <div className="aspect-[16/10] rounded-2xl bg-white/[0.03] animate-pulse" />;
+}
+
+// ─── Project Card ─────────────────────────────────────────────────────────────
+function ProjectCard({
+  project,
+  onClick,
+}: {
+  project: ProjectData;
+  onClick: () => void;
+}) {
+  const accent = COLOR_THEMES[project.colorTheme] ?? COLOR_THEMES.sky;
+  const cardRef = useRef<HTMLDivElement>(null);
 
   return (
-      <section
-        ref={sectionRef}
-        style={{ backgroundColor: '#0a0a0a' }}
-        className="relative py-28 px-6 md:px-12 lg:px-20"
-      >
+    <motion.div
+      ref={cardRef}
+      variants={fadeUp}
+      transition={{ duration: 0.6 }}
+      whileHover={{ y: -6, scale: 1.015 }}
+      onClick={onClick}
+      className="group relative aspect-[16/10] rounded-2xl overflow-hidden border cursor-pointer transition-all duration-500"
+      style={{ willChange: 'transform, opacity', borderColor: accent.ring }}
+      onHoverStart={() => {
+        if (cardRef.current) {
+          cardRef.current.style.boxShadow = `0 8px 40px ${accent.ring}, 0 0 0 1px ${accent.ring}`;
+        }
+      }}
+      onHoverEnd={() => {
+        if (cardRef.current) {
+          cardRef.current.style.boxShadow = 'none';
+        }
+      }}
+    >
+      {/* Thumbnail background */}
+      {project.thumbnail ? (
+        <Image
+          src={project.thumbnail}
+          alt={project.title}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      ) : (
+        <div className={`absolute inset-0 bg-gradient-to-br ${accent.from} to-transparent`} />
+      )}
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
+
+      {/* Bottom content */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 flex items-end justify-between gap-4">
+        <h3 className="text-base md:text-lg font-bold text-white tracking-tight leading-snug">
+          {project.title}
+        </h3>
+
+        <div
+          className="flex items-center gap-3 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {project.githubLink && (
+            <a
+              href={project.githubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white transition-colors p-1"
+              aria-label="View source code"
+            >
+              <GitHubIcon />
+            </a>
+          )}
+          {project.liveLink && (
+            <a
+              href={project.liveLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white transition-colors p-1"
+              aria-label="View live demo"
+            >
+              <ExternalLinkIcon />
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom accent line */}
+      <div
+        className={`absolute bottom-0 left-0 right-0 h-[2px] ${accent.line} opacity-0 group-hover:opacity-60 transition-opacity duration-500`}
+      />
+    </motion.div>
+  );
+}
+
+// ─── Main Section ─────────────────────────────────────────────────────────────
+export default function Projects() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      const res = await fetch('/api/projects');
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      setProjects(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('[Projects]', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  // Re-fetch when tab becomes visible (e.g. switching back from admin)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchProjects();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [fetchProjects]);
+
+  return (
+    <section
+      ref={sectionRef}
+      style={{ backgroundColor: '#0a0a0a' }}
+      className="relative py-28 px-6 md:px-12 lg:px-20"
+    >
       {/* Section transition glow */}
       <div
         className="absolute top-0 inset-x-0 h-px pointer-events-none"
@@ -107,33 +178,49 @@ export default function Projects() {
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse at top, rgba(139,92,246,0.07) 0%, transparent 70%)' }}
       />
-        {/* Section header */}
-        <div id="work" className="mb-16 md:mb-20 text-center mx-auto scroll-mt-20">
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-[11px] uppercase tracking-[0.4em] text-white/25 mb-5 font-light"
-          >
-            Selected Work
-          </motion.p>
 
-          <motion.h2
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ duration: 0.55, delay: 0.05 }}
-            className="text-4xl sm:text-5xl md:text-[4.5rem] font-black text-white leading-none tracking-[-0.03em]"
-          >
-            Projects
-            <span className="text-white/15">.</span>
-          </motion.h2>
+      {/* Section header */}
+      <div id="work" className="mb-16 md:mb-20 text-center mx-auto scroll-mt-20">
+        <motion.p
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-[11px] uppercase tracking-[0.4em] text-white/25 mb-5 font-light"
+        >
+          Selected Work
+        </motion.p>
+
+        <motion.h2
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.05 }}
+          className="text-4xl sm:text-5xl md:text-[4.5rem] font-black text-white leading-none tracking-[-0.03em]"
+        >
+          Projects
+          <span className="text-white/15">.</span>
+        </motion.h2>
+      </div>
+
+      {/* Cards */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <CardSkeleton key={i} />
+          ))}
         </div>
-
-        {/* Cards */}
+      ) : projects.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-20"
+        >
+          <p className="text-white/25 text-lg">No projects yet</p>
+        </motion.div>
+      ) : (
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -141,94 +228,25 @@ export default function Projects() {
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
-          {projects.map((p) => (
-            <ProjectCard key={p.num} project={p} />
+          {projects.map((project) => (
+            <ProjectCard
+              key={project._id}
+              project={project}
+              onClick={() => setSelectedProject(project)}
+            />
           ))}
         </motion.div>
-      </section>
-  );
-}
+      )}
 
-// ─── Project card ─────────────────────────────────────────────────────────────
-function ProjectCard({ project }: { project: (typeof projects)[number] }) {
-  const { num, title, category, description, tags, year, href, accent } = project;
-
-  return (
-    <motion.a
-      href={href}
-      variants={fadeUp}
-      transition={{ duration: 0.6 }}
-      whileHover={{ y: -6, scale: 1.015 }}
-      className={`
-        group relative flex flex-col rounded-2xl overflow-hidden
-        border border-white/[0.07] ${accent.border}
-        bg-gradient-to-br ${accent.from} to-transparent
-        backdrop-blur-sm
-        p-7 md:p-8
-        shadow-xl ${accent.glow}
-        transition-all duration-500
-      `}
-      style={{ willChange: 'transform, opacity' }}
-    >
-      {/* Top row */}
-      <div className="flex items-start justify-between mb-7">
-        <span className="text-5xl font-black text-white/[0.07] leading-none select-none">
-          {num}
-        </span>
-        <span className={`text-[11px] font-semibold uppercase tracking-widest ${accent.tag}`}>
-          {year}
-        </span>
-      </div>
-
-      {/* Content */}
-      <p className="text-[10px] uppercase tracking-[0.35em] text-white/25 mb-2.5 font-light">
-        {category}
-      </p>
-      <h3 className="text-xl md:text-2xl font-bold text-white mb-3 tracking-tight leading-snug">
-        {title}
-      </h3>
-      <p className="text-white/40 text-sm leading-relaxed flex-1">
-        {description}
-      </p>
-
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2 mt-5">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="text-[11px] px-2.5 py-1 rounded-md border border-white/[0.08] text-white/35 font-medium tracking-wide"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {/* CTA */}
-      <div
-        className={`
-          flex items-center gap-2 mt-6 text-xs font-medium uppercase tracking-widest
-          ${accent.tag} opacity-50 group-hover:opacity-100 transition-opacity duration-300
-        `}
-      >
-        <span>View Case Study</span>
-        <svg
-          className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-        </svg>
-      </div>
-
-      {/* Hover bottom accent line */}
-      <div
-        className={`
-          absolute bottom-0 left-0 right-0 h-px
-          ${accent.line}
-          opacity-0 group-hover:opacity-30 transition-opacity duration-500
-        `}
-      />
-    </motion.a>
+      {/* macOS Detail Window */}
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectDetailWindow
+            project={selectedProject}
+            onClose={() => setSelectedProject(null)}
+          />
+        )}
+      </AnimatePresence>
+    </section>
   );
 }

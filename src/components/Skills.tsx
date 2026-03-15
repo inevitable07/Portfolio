@@ -1,130 +1,92 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useInView } from 'framer-motion';
+import Image from 'next/image';
 
-const skillGroups = [
-  {
-    heading: 'Cloud & Infrastructure',
-    color: 'from-sky-500 to-blue-600',
-    skills: [
-      { name: 'AWS', level: 90 },
-      { name: 'Terraform', level: 85 },
-      { name: 'Kubernetes', level: 80 },
-      { name: 'Docker', level: 92 },
-    ],
-  },
-  {
-    heading: 'CI/CD & Automation',
-    color: 'from-violet-500 to-purple-600',
-    skills: [
-      { name: 'GitHub Actions', level: 88 },
-      { name: 'Jenkins', level: 78 },
-      { name: 'ArgoCD', level: 72 },
-      { name: 'Ansible', level: 75 },
-    ],
-  },
-  {
-    heading: 'Observability & Security',
-    color: 'from-emerald-500 to-teal-600',
-    skills: [
-      { name: 'Prometheus / Grafana', level: 82 },
-      { name: 'ELK Stack', level: 74 },
-      { name: 'Vault', level: 68 },
-      { name: 'Datadog', level: 70 },
-    ],
-  },
-];
-
-// ─── Single bar ───────────────────────────────────────────────────────────────
-function SkillBar({
-  name,
-  level,
-  color,
-  index,
-  inView,
-}: {
+interface SkillData {
+  _id: string;
   name: string;
-  level: number;
-  color: string;
-  index: number;
-  inView: boolean;
-}) {
-  return (
-    <div className="mb-5 last:mb-0">
-      <div className="flex justify-between items-baseline mb-2">
-        <span className="text-sm text-white/70 font-medium">{name}</span>
-        <motion.span
-          className="text-xs text-white/35 font-light tabular-nums"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.4, delay: index * 0.08 + 0.3 }}
-        >
-          {level}%
-        </motion.span>
-      </div>
-
-      {/* Track */}
-      <div className="w-full h-1 rounded-full bg-white/[0.07] overflow-hidden">
-        {/* Fill */}
-        <motion.div
-          className={`h-full rounded-full bg-gradient-to-r ${color}`}
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${level}%` } : {}}
-          transition={{
-            duration: 1.0,
-            delay: index * 0.08 + 0.15,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          style={{ willChange: 'width' }}
-        />
-      </div>
-    </div>
-  );
+  icon: string;
+  order: number;
 }
 
-// ─── Skill group card ─────────────────────────────────────────────────────────
-function SkillGroup({
-  group,
-  cardIndex,
-}: {
-  group: (typeof skillGroups)[number];
-  cardIndex: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
 
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+// ─── Skill Card ──────────────────────────────────────────────────────────────
+function SkillCard({ skill }: { skill: SkillData }) {
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 36 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, delay: cardIndex * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-7"
+      variants={fadeUp}
+      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center hover:border-white/[0.13] transition-colors duration-300"
     >
-      <p
-        className={`text-xs uppercase tracking-[0.35em] font-semibold bg-gradient-to-r ${group.color} bg-clip-text text-transparent mb-6`}
-      >
-        {group.heading}
-      </p>
-      {group.skills.map((skill, i) => (
-        <SkillBar
-          key={skill.name}
-          name={skill.name}
-          level={skill.level}
-          color={group.color}
-          index={i}
-          inView={inView}
-        />
-      ))}
+      <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden bg-white/[0.05] flex items-center justify-center">
+        {skill.icon ? (
+          <Image
+            src={skill.icon}
+            alt={skill.name}
+            width={64}
+            height={64}
+            className="object-cover"
+          />
+        ) : (
+          <span className="text-white/20 text-xs">--</span>
+        )}
+      </div>
+      <p className="text-sm text-white/70 font-medium">{skill.name}</p>
     </motion.div>
   );
 }
 
-// ─── Section ──────────────────────────────────────────────────────────────────
+// ─── Skeleton Card ───────────────────────────────────────────────────────────
+function CardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-6 animate-pulse">
+      <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-white/[0.05]" />
+      <div className="h-4 w-20 mx-auto rounded bg-white/[0.05]" />
+    </div>
+  );
+}
+
+// ─── Section ─────────────────────────────────────────────────────────────────
 export default function Skills() {
   const headerRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(headerRef, { once: true });
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const [skills, setSkills] = useState<SkillData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSkills = useCallback(async () => {
+    try {
+      const res = await fetch('/api/skills');
+      const data = await res.json();
+      setSkills(Array.isArray(data) ? data : []);
+    } catch {
+      console.error('Failed to fetch skills');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchSkills(); }, [fetchSkills]);
+
+  // Re-fetch when returning from admin panel
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchSkills();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [fetchSkills]);
 
   return (
     <section
@@ -141,6 +103,7 @@ export default function Skills() {
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse at top, rgba(16,185,129,0.07) 0%, transparent 70%)' }}
       />
+
       {/* Header */}
       <div ref={headerRef} className="mb-16 text-center mx-auto">
         <motion.p
@@ -163,11 +126,30 @@ export default function Skills() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-        {skillGroups.map((group, i) => (
-          <SkillGroup key={group.heading} group={group} cardIndex={i} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      ) : skills.length === 0 ? (
+        <div className="text-center py-16 text-white/25">
+          <p className="text-lg">No skills yet</p>
+        </div>
+      ) : (
+        <motion.div
+          ref={gridRef}
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto"
+        >
+          {skills.map((skill) => (
+            <SkillCard key={skill._id} skill={skill} />
+          ))}
+        </motion.div>
+      )}
     </section>
   );
 }
