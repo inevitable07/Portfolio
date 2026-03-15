@@ -77,6 +77,20 @@ export default function Hero() {
       */}
       <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] h-screen min-h-screen">
 
+        {/* ── Logo — top-left, links to admin portal ─────────────── */}
+        <a
+          href="/admin"
+          className="absolute top-6 left-6 sm:left-8 lg:left-10 z-20"
+          aria-label="Admin Portal"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-10 w-auto object-contain"
+          />
+        </a>
+
         {/* ── LEFT — intro text ──────────────────────────────────────── */}
         <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 py-20 lg:py-0">
           <AnimatePresence>

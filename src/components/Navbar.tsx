@@ -5,7 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const navLinks = [
-  { label: 'Work', href: '#work' },
+  { label: 'About', href: '#hero' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Projects', href: '#work' },
+  { label: 'Journey', href: '#education' },
 ];
 
 export default function Navbar() {
@@ -14,8 +17,6 @@ export default function Navbar() {
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pastHeroRef = useRef(false);
 
-  // Only show navbar after the user has scrolled past the hero section.
-  // Once past hero: show on scroll, hide 1.5 s after scrolling stops.
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById('hero');
@@ -23,14 +24,12 @@ export default function Navbar() {
       const beyondHero = window.scrollY + window.innerHeight * 0.1 >= heroBottom;
 
       if (!beyondHero) {
-        // Still inside hero — keep hidden, clear any pending timer
         pastHeroRef.current = false;
         setVisible(false);
         if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
         return;
       }
 
-      // Past hero — show and start idle-hide timer
       pastHeroRef.current = true;
       setVisible(true);
       if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
@@ -44,7 +43,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // Close menu on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -61,37 +59,33 @@ export default function Navbar() {
       transition={{ duration: 0.4, ease: 'easeInOut' }}
       style={{ pointerEvents: visible ? 'auto' : 'none' }}
     >
-      <nav className="relative flex items-center justify-between px-6 md:px-10 py-5">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="group flex items-center gap-1 text-white font-bold text-lg tracking-tight select-none"
-          aria-label="Home"
-        >
-          <span style={{ color: '#f97316' }}>A</span>
-          <span className="text-white">ashish</span>
-          <span style={{ color: '#f97316' }}>.</span>
+      <nav className="relative flex items-center justify-between px-6 md:px-10 py-4">
+        {/* Logo - left — scrolls to hero */}
+        <Link href="#hero" className="flex items-center select-none" aria-label="Home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-10 w-auto object-contain"
+          />
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="group relative text-white/50 hover:text-white text-sm tracking-wide font-medium transition-colors duration-200"
-            >
-              {link.label}
-              {/* Animated underline */}
-              <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-white group-hover:w-full transition-all duration-300 ease-out" />
-            </Link>
-          ))}
-          <Link
-            href="#contact"
-            className="relative px-5 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/15 hover:border-white/35 rounded-full transition-all duration-300"
+        {/* Desktop nav - centered pill */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
+          <div
+            className="flex items-center gap-1 px-2 py-2 rounded-full border border-white/[0.08]"
+            style={{ backgroundColor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(12px)' }}
           >
-            Contact
-          </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="px-4 py-1.5 text-white/60 hover:text-white text-sm font-medium rounded-full hover:bg-white/10 transition-all duration-200"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Mobile hamburger */}
@@ -102,7 +96,7 @@ export default function Navbar() {
         >
           <motion.span
             animate={menuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-            className="block w-5 h-px bg-white/70 origin-center transition-colors"
+            className="block w-5 h-px bg-white/70 origin-center"
           />
           <motion.span
             animate={menuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
@@ -124,7 +118,7 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="absolute left-0 right-0 top-full overflow-hidden backdrop-blur-xl"
-            style={{ backgroundColor: 'rgba(10, 10, 10, 0.95)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ backgroundColor: 'rgba(10,10,10,0.95)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
           >
             <div className="flex flex-col gap-0 px-6 py-4">
               {navLinks.map((link) => (
@@ -137,13 +131,6 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="#contact"
-                onClick={() => setMenuOpen(false)}
-                className="mt-4 mb-2 py-2.5 text-center text-sm font-medium text-white border border-white/15 rounded-full transition-all"
-              >
-                Contact
-              </Link>
             </div>
           </motion.div>
         )}
