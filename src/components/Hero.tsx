@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LoadingScreen from './LoadingScreen';
 
 const containerVariants = {
   hidden: {},
@@ -19,26 +20,16 @@ const lineVariants = {
   },
 };
 
-export default function Hero() {
+// ─── Inner component — receives the already-detected videoSrc ────────────────
+function HeroContent({ videoSrc }: { videoSrc: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const textRevealedRef = useRef(false);
   const [textVisible, setTextVisible] = useState(false);
   const [scrollHint, setScrollHint] = useState(false);
-  // null = not yet determined (SSR / before mount)
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
 
-  // Step 1 — detect screen size and pick the right video source
+  const isDesktop = !videoSrc.includes('smallScreen');
+
   useEffect(() => {
-    const small = window.innerWidth < 1024;
-    setIsDesktop(!small);
-    setVideoSrc(small ? '/animation1-smallScreen.mp4' : '/animation1.mp4');
-  }, []);
-
-  // Step 2 — once the correct <video> is in the DOM, start playback
-  useEffect(() => {
-    if (!videoSrc) return;
-
     const video = videoRef.current;
     if (!video) return;
 
@@ -71,7 +62,6 @@ export default function Hero() {
 
     const tryPlay = () => {
       video.play().catch(() => {
-        // Autoplay blocked — reveal content immediately
         textRevealedRef.current = true;
         setTextVisible(true);
         setScrollHint(true);
@@ -90,7 +80,7 @@ export default function Hero() {
       video.removeEventListener('canplay', tryPlay);
       clearTimeout(fallbackTimer);
     };
-  }, [videoSrc]);
+  }, []);
 
   return (
     <section
@@ -98,21 +88,16 @@ export default function Hero() {
       className="relative w-full min-h-screen"
       style={{ backgroundColor: '#121212' }}
     >
-      {/* Two-column grid — mobile: video top, text bottom; desktop: text left, video right */}
       <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] min-h-screen lg:h-screen">
 
-        {/* Logo — top-left, links to admin portal */}
+        {/* Logo */}
         <a
           href="/admin"
           className="absolute top-6 left-6 sm:left-8 lg:left-10 z-20"
           aria-label="Admin Portal"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="h-10 w-auto object-contain"
-          />
+          <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
         </a>
 
         {/* LEFT — intro text */}
@@ -170,18 +155,9 @@ export default function Hero() {
                     download
                     className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors duration-300"
                   >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4"
-                      />
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
+                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4" />
                     </svg>
                     Resume
                   </a>
@@ -199,49 +175,34 @@ export default function Hero() {
 
         {/* RIGHT — video */}
         <div className="order-1 lg:order-2 relative w-full h-[80vh] sm:h-[75vh] md:h-[80vh] lg:h-full flex items-center justify-center overflow-hidden">
-          {/* Left-edge vignette — desktop only */}
           <div
             className="absolute inset-0 z-10 pointer-events-none hidden lg:block"
-            style={{
-              background:
-                'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)',
-            }}
+            style={{ background: 'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)' }}
           />
-          {/* Bottom vignette — mobile/tablet, blends into text section */}
           <div
             className="absolute inset-0 z-10 pointer-events-none lg:hidden"
-            style={{
-              background:
-                'linear-gradient(to bottom, transparent 60%, #121212 100%)',
-            }}
+            style={{ background: 'linear-gradient(to bottom, transparent 60%, #121212 100%)' }}
           />
-
-          {/* Single video element — src is set client-side after screen size is known */}
-          {videoSrc && (
-            <video
-              key={videoSrc}
-              ref={videoRef}
-              muted
-              playsInline
-              poster="/hero-poster.png"
-              preload="auto"
-              className={[
-                'absolute inset-0 w-full h-full object-cover',
-                isDesktop ? 'object-[90%_top]' : 'object-center',
-              ].join(' ')}
-            >
-              <source src={videoSrc} type="video/mp4" />
-            </video>
-          )}
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            poster="/hero-poster.png"
+            preload="auto"
+            className={[
+              'absolute inset-0 w-full h-full object-cover',
+              isDesktop ? 'object-[90%_top]' : 'object-center',
+            ].join(' ')}
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
         </div>
       </div>
 
       {/* Bottom vignette */}
       <div
         className="absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, #121212 0%, transparent 100%)',
-        }}
+        style={{ background: 'linear-gradient(to top, #121212 0%, transparent 100%)' }}
       />
 
       {/* Scroll indicator — desktop only */}
@@ -254,33 +215,38 @@ export default function Hero() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-2"
           >
-            <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">
-              Scroll
-            </span>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">Scroll</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               className="w-5 h-5 flex items-center justify-center"
             >
-              <svg
-                width="12"
-                height="8"
-                viewBox="0 0 12 8"
-                fill="none"
-                className="text-white/30"
-              >
-                <path
-                  d="M1 1l5 5 5-5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className="text-white/30">
+                <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </section>
+  );
+}
+
+// ─── Exported component — shows loader first, then hero ─────────────────────
+export default function Hero() {
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  return (
+    <>
+      {/* Hero content renders underneath loading screen, starts when src is known */}
+      {videoSrc && <HeroContent videoSrc={videoSrc} />}
+
+      {/* Loading screen sits on top as a fixed overlay, fades out when done */}
+      <AnimatePresence>
+        {!videoSrc && (
+          <LoadingScreen onComplete={setVideoSrc} />
+        )}
+      </AnimatePresence>
+    </>
   );
 }
