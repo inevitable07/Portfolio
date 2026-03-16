@@ -4,24 +4,27 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const [counts, setCounts] = useState<{ projects: number | null; skills: number | null; certificates: number | null }>({
+  const [counts, setCounts] = useState<{ projects: number | null; skills: number | null; certificates: number | null; achievements: number | null }>({
     projects: null,
     skills: null,
     certificates: null,
+    achievements: null,
   });
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [projRes, skillRes, certRes] = await Promise.allSettled([
+      const [projRes, skillRes, certRes, achieveRes] = await Promise.allSettled([
         fetch('/api/projects').then((r) => r.json()),
         fetch('/api/skills').then((r) => r.json()),
         fetch('/api/certificates').then((r) => r.json()),
+        fetch('/api/achievements').then((r) => r.json()),
       ]);
 
       setCounts({
         projects: projRes.status === 'fulfilled' && Array.isArray(projRes.value) ? projRes.value.length : 0,
         skills: skillRes.status === 'fulfilled' && Array.isArray(skillRes.value) ? skillRes.value.length : 0,
         certificates: certRes.status === 'fulfilled' && Array.isArray(certRes.value) ? certRes.value.length : 0,
+        achievements: achieveRes.status === 'fulfilled' && Array.isArray(achieveRes.value) ? achieveRes.value.length : 0,
       });
     };
     fetchCounts();
@@ -31,13 +34,14 @@ export default function AdminDashboard() {
     { title: 'Projects', description: 'Manage portfolio projects', href: '/admin/projects', count: counts.projects },
     { title: 'Skills', description: 'Manage skill icons', href: '/admin/skills', count: counts.skills },
     { title: 'Certificates', description: 'Manage certificates', href: '/admin/certificates', count: counts.certificates },
+    { title: 'Achievements', description: 'Manage achievements', href: '/admin/achievements', count: counts.achievements },
   ];
 
   return (
     <div>
       <h2 className="text-xl font-bold mb-8">Dashboard</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {sections.map((s) => (
           <Link
             key={s.href}
