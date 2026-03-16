@@ -11,6 +11,7 @@ export interface CertificateData {
   thumbnail: string;
   certificateLink: string;
   order: number;
+  featured?: boolean;
 }
 
 function ExternalLinkIcon({ size = 18 }: { size?: number }) {

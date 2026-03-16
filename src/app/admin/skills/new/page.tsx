@@ -11,6 +11,7 @@ export default function NewSkill() {
   const [name, setName] = useState('');
   const [order, setOrder] = useState(1);
   const [category, setCategory] = useState<'technical' | 'soft'>('technical');
+  const [featured, setFeatured] = useState(true);
   const [icon, setIcon] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,6 +24,7 @@ export default function NewSkill() {
       formData.append('name', name);
       formData.append('order', String(order));
       formData.append('category', category);
+      formData.append('featured', String(featured));
       if (icon) formData.append('icon', icon);
 
       const res = await fetch('/api/skills', { method: 'POST', body: formData });
@@ -70,6 +72,18 @@ export default function NewSkill() {
             <option value="technical">Technical</option>
             <option value="soft">Soft</option>
           </select>
+        </div>
+
+        {/* Featured */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFeatured((v) => !v)}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ${featured ? 'bg-emerald-500/70' : 'bg-white/10'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${featured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+          <span className="text-xs text-white/50">Featured — show on homepage</span>
         </div>
 
         {/* Icon */}

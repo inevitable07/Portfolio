@@ -9,6 +9,7 @@ interface SkillItem {
   icon: string;
   order: number;
   category?: 'technical' | 'soft';
+  featured?: boolean;
 }
 
 export default function AdminSkills() {
@@ -92,6 +93,11 @@ export default function AdminSkills() {
                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${(s.category ?? 'technical') === 'technical' ? 'bg-emerald-500/10 text-emerald-400/70' : 'bg-violet-500/10 text-violet-400/70'}`}>
                     {(s.category ?? 'technical') === 'technical' ? 'Technical' : 'Soft'}
                   </span>
+                  {(s.featured ?? true) && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 bg-amber-500/10 text-amber-400/70">
+                      Featured
+                    </span>
+                  )}
                 </div>
                 <span className="text-[10px] text-white/25">Order: {s.order}</span>
               </div>

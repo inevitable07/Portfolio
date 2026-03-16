@@ -239,8 +239,8 @@ export default function Projects() {
         </motion.div>
       )}
 
-      {/* View All CTA */}
-      {!loading && (
+      {/* View All CTA — only when filling at least one full row (2 cols on md) */}
+      {!loading && projects.length >= 2 && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}

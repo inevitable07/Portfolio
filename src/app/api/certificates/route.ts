@@ -3,10 +3,12 @@ import { connectDB } from '@/lib/mongodb';
 import Certificate from '@/models/Certificate';
 import { uploadImage } from '@/lib/cloudinary';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const certificates = await Certificate.find({}).sort({ order: 1, createdAt: -1 }).lean();
+    const { searchParams } = new URL(request.url);
+    const filter = searchParams.get('featured') === 'true' ? { featured: true } : {};
+    const certificates = await Certificate.find(filter).sort({ order: 1, createdAt: -1 }).lean();
     return NextResponse.json(certificates);
   } catch (err) {
     console.error('[certificates GET]', err);
@@ -22,6 +24,7 @@ export async function POST(request: Request) {
     const name = formData.get('name') as string;
     const certificateLink = (formData.get('certificateLink') as string) ?? '';
     const order = parseInt((formData.get('order') as string) || '0', 10);
+    const featured = formData.get('featured') !== 'false';
     const file = formData.get('thumbnail') as File | null;
 
     if (!name) {
@@ -35,7 +38,7 @@ export async function POST(request: Request) {
       thumbnail = result.url;
     }
 
-    const certificate = await Certificate.create({ name, thumbnail, certificateLink, order });
+    const certificate = await Certificate.create({ name, thumbnail, certificateLink, order, featured });
     return NextResponse.json(certificate, { status: 201 });
   } catch (err) {
     console.error('[certificates POST]', err);

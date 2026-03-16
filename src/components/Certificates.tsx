@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import CertificateDetailWindow, { CertificateData } from './CertificateDetailWindow';
 
 const fadeUp = {
@@ -101,7 +102,7 @@ export default function Certificates() {
 
   const fetchCertificates = useCallback(async () => {
     try {
-      const res = await fetch('/api/certificates');
+      const res = await fetch('/api/certificates?featured=true');
       const data = await res.json();
       setCertificates(Array.isArray(data) ? data : []);
     } catch {
@@ -181,6 +182,27 @@ export default function Certificates() {
           {certificates.map((cert) => (
             <CertCard key={cert._id} cert={cert} onOpenModal={setSelected} />
           ))}
+        </motion.div>
+      )}
+
+      {/* View All CTA — only when filling at least one full row (3 cols on lg) */}
+      {!loading && certificates.length >= 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-10 flex justify-center"
+        >
+          <Link
+            href="/certificates"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-white/[0.12] text-white/60 text-sm font-medium hover:text-white hover:border-white/25 transition-all duration-300"
+          >
+            View All Certificates
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
         </motion.div>
       )}
 

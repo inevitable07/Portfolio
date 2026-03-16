@@ -22,11 +22,13 @@ export async function PUT(
     const name = formData.get('name') as string | null;
     const order = formData.get('order') as string | null;
     const category = formData.get('category') as string | null;
+    const featuredRaw = formData.get('featured') as string | null;
     const file = formData.get('icon') as File | null;
 
     if (name !== null) updates.name = name;
     if (order !== null) updates.order = parseInt(order, 10);
     if (category !== null) updates.category = category;
+    if (featuredRaw !== null) updates.featured = featuredRaw !== 'false';
 
     if (file && file.size > 0) {
       const existing = await Skill.findById(id).lean();

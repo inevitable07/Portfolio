@@ -22,11 +22,13 @@ export async function PUT(
     const name = formData.get('name') as string | null;
     const certificateLink = formData.get('certificateLink') as string | null;
     const order = formData.get('order') as string | null;
+    const featuredRaw = formData.get('featured') as string | null;
     const file = formData.get('thumbnail') as File | null;
 
     if (name !== null) updates.name = name;
     if (certificateLink !== null) updates.certificateLink = certificateLink;
     if (order !== null) updates.order = parseInt(order, 10);
+    if (featuredRaw !== null) updates.featured = featuredRaw !== 'false';
 
     if (file && file.size > 0) {
       const existing = await Certificate.findById(id).lean();
