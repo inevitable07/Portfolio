@@ -14,10 +14,25 @@ export default function LoadingScreen({ onComplete }: Props) {
 
   useEffect(() => {
     const isSmall = window.innerWidth < 1024;
-    const src = isSmall ? '/animation1-smallScreen.mp4' : '/animation1.mp4';
+
+    if (isSmall) {
+      // Mobile: no video — run counter quickly and finish
+      let count = 0;
+      const interval = setInterval(() => {
+        count = Math.min(count + 1, 100);
+        setProgress(count);
+        if (count >= 100) {
+          clearInterval(interval);
+          onComplete('');
+        }
+      }, 25);
+      return () => clearInterval(interval);
+    }
+
+    // Desktop: preload the video before completing
+    const src = '/animation1.mp4';
     srcRef.current = src;
 
-    // Preload the correct video in the background
     const video = document.createElement('video');
     video.muted = true;
     video.preload = 'auto';
