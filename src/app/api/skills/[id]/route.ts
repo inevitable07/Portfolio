@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Skill from '@/models/Skill';
 import { uploadIcon, deleteImage } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth';
 
 function extractPublicId(url: string): string | null {
   const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
@@ -12,6 +13,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();
@@ -60,6 +64,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();

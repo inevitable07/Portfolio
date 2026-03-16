@@ -58,8 +58,11 @@ function ProjectCard({
       transition={{ duration: 0.6 }}
       whileHover={{ y: -6, scale: 1.015 }}
       onClick={onClick}
-      className="group relative aspect-[16/10] rounded-2xl overflow-hidden border cursor-pointer transition-all duration-500"
-      style={{ willChange: 'transform, opacity', borderColor: accent.ring }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      role="button"
+      tabIndex={0}
+      className="group relative aspect-[16/10] rounded-2xl overflow-hidden border cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+      style={{ borderColor: accent.ring }}
       onHoverStart={() => {
         if (cardRef.current) {
           cardRef.current.style.boxShadow = `0 8px 40px ${accent.ring}, 0 0 0 1px ${accent.ring}`;

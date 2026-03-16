@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Certificate from '@/models/Certificate';
 import { uploadImage } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
@@ -17,6 +18,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     await connectDB();
     const formData = await request.formData();

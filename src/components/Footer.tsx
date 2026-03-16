@@ -9,12 +9,13 @@ function useVisitorCount() {
     const already = sessionStorage.getItem('_v_seen');
 
     if (already) {
-      fetch('/api/visitors').then(r => r.json()).then(d => setCount(d.count));
+      fetch('/api/visitors').then(r => r.json()).then(d => setCount(d.count)).catch(() => {});
     } else {
       sessionStorage.setItem('_v_seen', '1');
       fetch('/api/visitors', { method: 'POST' })
         .then(r => r.json())
-        .then(d => setCount(d.count));
+        .then(d => setCount(d.count))
+        .catch(() => {});
     }
   }, []);
 

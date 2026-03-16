@@ -37,7 +37,7 @@ function CertCard({
   return (
     <motion.div
       variants={fadeUp}
-      className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden hover:border-white/[0.13] transition-colors duration-300"
+      className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden hover:border-amber-500/[0.25] hover:shadow-[0_0_22px_rgba(245,158,11,0.10)] transition-all duration-300"
     >
       {/* Thumbnail — click opens modal */}
       <button
@@ -90,7 +90,7 @@ function AchievCard({
   return (
     <motion.div
       variants={fadeUp}
-      className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden hover:border-white/[0.13] transition-colors duration-300"
+      className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden hover:border-amber-500/[0.25] hover:shadow-[0_0_22px_rgba(245,158,11,0.10)] transition-all duration-300"
     >
       {/* Thumbnail — click opens modal */}
       <button

@@ -29,7 +29,7 @@ function SkillCard({ skill }: { skill: SkillData }) {
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center hover:border-white/[0.13] transition-colors duration-300"
+      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center hover:border-emerald-500/[0.25] hover:shadow-[0_0_22px_rgba(16,185,129,0.12)] transition-all duration-300"
     >
       <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden bg-white/[0.05] flex items-center justify-center">
         {skill.icon ? (

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Text reveal variants
 const containerVariants = {
   hidden: {},
   visible: {
@@ -25,35 +24,73 @@ export default function Hero() {
   const textRevealedRef = useRef(false);
   const [textVisible, setTextVisible] = useState(false);
   const [scrollHint, setScrollHint] = useState(false);
+  // null = not yet determined (SSR / before mount)
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
 
+  // Step 1 — detect screen size and pick the right video source
   useEffect(() => {
+    const small = window.innerWidth < 1024;
+    setIsDesktop(!small);
+    setVideoSrc(small ? '/animation1-smallScreen.mp4' : '/animation1.mp4');
+  }, []);
+
+  // Step 2 — once the correct <video> is in the DOM, start playback
+  useEffect(() => {
+    if (!videoSrc) return;
+
     const video = videoRef.current;
     if (!video) return;
 
+    video.loop = false;
+
     const onTimeUpdate = () => {
-      // Reveal text at 1.3 s, only once
       if (video.currentTime >= 1.3 && !textRevealedRef.current) {
         textRevealedRef.current = true;
-        video.playbackRate = 0.8; // cinematic slow-down
+        video.playbackRate = 0.8;
         setTextVisible(true);
       }
     };
 
-    video.addEventListener('timeupdate', onTimeUpdate);
-    // Temporarily remove `loop` so `ended` fires, then re-add it
-    video.loop = false;
     const onEnded = () => {
       setScrollHint(true);
       video.loop = true;
       video.play().catch(() => {});
     };
+
+    video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
+
+    const fallbackTimer = setTimeout(() => {
+      setScrollHint(true);
+      if (!textRevealedRef.current) {
+        textRevealedRef.current = true;
+        setTextVisible(true);
+      }
+    }, 6000);
+
+    const tryPlay = () => {
+      video.play().catch(() => {
+        // Autoplay blocked — reveal content immediately
+        textRevealedRef.current = true;
+        setTextVisible(true);
+        setScrollHint(true);
+      });
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener('canplay', tryPlay, { once: true });
+    }
 
     return () => {
       video.removeEventListener('timeupdate', onTimeUpdate);
       video.removeEventListener('ended', onEnded);
+      video.removeEventListener('canplay', tryPlay);
+      clearTimeout(fallbackTimer);
     };
-  }, []);
+  }, [videoSrc]);
 
   return (
     <section
@@ -61,10 +98,10 @@ export default function Hero() {
       className="relative w-full min-h-screen"
       style={{ backgroundColor: '#121212' }}
     >
-      {/* ── Two-column grid ────────────────────────────────────────────── */}
-      <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] h-screen min-h-screen">
+      {/* Two-column grid — mobile: video top, text bottom; desktop: text left, video right */}
+      <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] min-h-screen lg:h-screen">
 
-        {/* ── Logo — top-left, links to admin portal ─────────────── */}
+        {/* Logo — top-left, links to admin portal */}
         <a
           href="/admin"
           className="absolute top-6 left-6 sm:left-8 lg:left-10 z-20"
@@ -78,8 +115,8 @@ export default function Hero() {
           />
         </a>
 
-        {/* ── LEFT — intro text ──────────────────────────────────────── */}
-        <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-20 py-20 lg:py-0">
+        {/* LEFT — intro text */}
+        <div className="order-2 lg:order-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">
           <AnimatePresence>
             {textVisible && (
               <motion.div
@@ -87,6 +124,7 @@ export default function Hero() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
+                className="text-center lg:text-left"
               >
                 <motion.p
                   variants={lineVariants}
@@ -97,7 +135,7 @@ export default function Hero() {
 
                 <motion.h1
                   variants={lineVariants}
-                  className="text-[clamp(2.8rem,7vw,6rem)] font-black text-white tracking-[-0.03em] leading-[0.95] mb-6"
+                  className="text-[clamp(2.2rem,8vw,6rem)] font-black text-white tracking-[-0.03em] leading-[0.95] mb-6"
                 >
                   Aashish
                   <br />
@@ -107,7 +145,7 @@ export default function Hero() {
 
                 <motion.div
                   variants={lineVariants}
-                  className="flex items-center gap-3 mb-5"
+                  className="flex items-center justify-center lg:justify-start gap-3 mb-5"
                 >
                   <span className="w-6 h-px bg-white/30" />
                   <p className="text-sm text-white/55 font-light tracking-[0.18em] uppercase">
@@ -117,7 +155,7 @@ export default function Hero() {
 
                 <motion.p
                   variants={lineVariants}
-                  className="text-white/40 text-sm leading-relaxed max-w-sm font-light mb-8"
+                  className="text-white/40 text-sm leading-relaxed max-w-sm mx-auto lg:mx-0 font-light mb-8"
                 >
                   I design, build&nbsp;&amp;&nbsp;ship infrastructure that moves
                   as fast as the teams that use it.
@@ -125,9 +163,8 @@ export default function Hero() {
 
                 <motion.div
                   variants={lineVariants}
-                  className="flex flex-wrap gap-3"
+                  className="flex flex-wrap justify-center lg:justify-start gap-3"
                 >
-                  {/* Resume — triggers a file download */}
                   <a
                     href="/resume.pdf"
                     download
@@ -160,31 +197,46 @@ export default function Hero() {
           </AnimatePresence>
         </div>
 
-        {/* ── RIGHT — video ──────────────────────────────────────────── */}
-        <div className="relative w-full h-[55vw] lg:h-full">
-          {/* subtle inner vignette on the left edge to blend into the text column */}
+        {/* RIGHT — video */}
+        <div className="order-1 lg:order-2 relative w-full h-[80vh] sm:h-[75vh] md:h-[80vh] lg:h-full flex items-center justify-center overflow-hidden">
+          {/* Left-edge vignette — desktop only */}
           <div
-            className="absolute inset-0 z-10 pointer-events-none"
+            className="absolute inset-0 z-10 pointer-events-none hidden lg:block"
             style={{
               background:
                 'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)',
             }}
           />
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            poster="/hero-poster.png"
-            className="absolute inset-0 w-full h-full object-cover object-[90%_top]"
-            preload="auto"
-          >
-            <source src="/animation1.mp4" type="video/mp4" />
-          </video>
+          {/* Bottom vignette — mobile/tablet, blends into text section */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none lg:hidden"
+            style={{
+              background:
+                'linear-gradient(to bottom, transparent 60%, #121212 100%)',
+            }}
+          />
+
+          {/* Single video element — src is set client-side after screen size is known */}
+          {videoSrc && (
+            <video
+              key={videoSrc}
+              ref={videoRef}
+              muted
+              playsInline
+              poster="/hero-poster.png"
+              preload="auto"
+              className={[
+                'absolute inset-0 w-full h-full object-cover',
+                isDesktop ? 'object-[90%_top]' : 'object-center',
+              ].join(' ')}
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          )}
         </div>
       </div>
 
-      {/* ── Bottom vignette ────────────────────────────────────────────── */}
+      {/* Bottom vignette */}
       <div
         className="absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none"
         style={{
@@ -192,7 +244,7 @@ export default function Hero() {
         }}
       />
 
-      {/* ── Scroll indicator ───────────────────────────────────────────── */}
+      {/* Scroll indicator — desktop only */}
       <AnimatePresence>
         {scrollHint && (
           <motion.div
@@ -200,7 +252,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-2"
           >
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">
               Scroll

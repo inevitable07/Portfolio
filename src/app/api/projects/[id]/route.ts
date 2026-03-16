@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { uploadImage, deleteImage } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth';
 
 /** Extract Cloudinary public_id from a secure_url */
 function extractPublicId(url: string): string | null {
@@ -13,6 +14,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();
@@ -77,6 +81,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();

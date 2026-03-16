@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -29,6 +29,8 @@ export default function CertificateDetailWindow({
   certificate: CertificateData;
   onClose: () => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -37,10 +39,31 @@ export default function CertificateDetailWindow({
     };
   }, []);
 
-  // Close on Escape
+  // Focus trap + Escape to close
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog) {
+      const closeBtn = dialog.querySelector<HTMLElement>('button[aria-label="Close"]');
+      closeBtn?.focus();
+    }
+  }, []);
+
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
     },
     [onClose],
   );
@@ -63,7 +86,7 @@ export default function CertificateDetailWindow({
       />
 
       {/* Centering wrapper */}
-      <div className="fixed z-50 inset-0 flex items-center justify-center pointer-events-none">
+      <div className="fixed z-50 inset-0 flex items-center justify-center pointer-events-none" role="dialog" aria-modal="true" aria-label={certificate.name} ref={dialogRef}>
         <motion.div
           initial={{ opacity: 0, scale: 0.92, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

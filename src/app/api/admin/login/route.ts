@@ -11,6 +11,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ success: true });
     response.cookies.set('admin_token', secret, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

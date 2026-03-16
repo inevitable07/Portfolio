@@ -138,8 +138,46 @@ function CardContent({ milestone }: { milestone: Milestone }) {
   );
 }
 
-// ─── Timeline Row ─────────────────────────────────────────────────────────────
-function TimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+// ─── Mobile Timeline Row (single column, spine on left) ──────────────────────
+function MobileTimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const { accent } = milestone;
+
+  return (
+    <div ref={ref} className="relative flex items-start gap-4 pl-8">
+      {/* Spine dot — left edge */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={inView ? { scale: 1, opacity: 1 } : {}}
+        transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
+        className="absolute left-0 top-6 z-10"
+      >
+        <div
+          className="w-5 h-5 rounded-full bg-[#0a0a0a] flex items-center justify-center border"
+          style={{ borderColor: accent.dot + '66', boxShadow: `0 0 10px ${accent.dotGlow}` }}
+        >
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accent.dot }} />
+        </div>
+      </motion.div>
+
+      {/* Card */}
+      <motion.div
+        initial={{ opacity: 0, x: 24 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.6, delay: index * 0.1, ease: 'easeOut' }}
+        className="w-full"
+      >
+        <div className="rounded-xl border p-5" style={{ backgroundImage: accent.grad, borderColor: accent.border }}>
+          <CardContent milestone={milestone} />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Desktop Timeline Row (alternating two-column) ───────────────────────────
+function DesktopTimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const isLeft = milestone.side === 'left';
@@ -148,16 +186,12 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
   return (
     <div ref={ref} className="relative grid grid-cols-2 items-center">
 
-      {/* ── Connector line – ROW-level absolute                                         ── */}
-      {/*   Extends 10 px INTO the dot on the spine side so it truly passes the diameter.  */}
-      {/*   z-0 so the dot (z-10) renders on top, hiding the overlap behind the circle.    */}
+      {/* Connector line */}
       <div
         className="absolute z-0 pointer-events-none"
         style={{
           height: 1,
-          top: 'calc(50% - 0.5px)',          // exact center – no fractional translate
-          // Left card:  card-right-edge (50% - 3rem) → 10 px past dot center (50% + 10px)
-          // Right card: 10 px before dot center (50% - 10px) → card-left-edge (50% + 3rem)
+          top: 'calc(50% - 0.5px)',
           left:  isLeft ? 'calc(50% - 3rem)'       : 'calc(50% - 10px)',
           width: isLeft ? 'calc(3rem + 10px)'      : 'calc(3rem + 10px)',
           backgroundImage: isLeft
@@ -166,7 +200,7 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         }}
       />
 
-      {/* ── Left column ── */}
+      {/* Left column */}
       <div className="flex items-center justify-end pr-12">
         {isLeft && (
           <motion.div
@@ -182,7 +216,7 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         )}
       </div>
 
-      {/* ── Right column ── */}
+      {/* Right column */}
       <div className="flex items-center justify-start pl-12">
         {!isLeft && (
           <motion.div
@@ -198,11 +232,7 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         )}
       </div>
 
-      {/* ── Spine dot – z-10 renders on top of the connector                        ── */}
-      {/*   Use calc() instead of Tailwind -translate-x/y so Framer Motion's scale      */}
-      {/*   transform doesn't conflict with a separate CSS translate transform.          */}
-      {/*   left/top position the TOP-LEFT corner; subtracting half the dot size (10px) */}
-      {/*   centres the dot at exactly (50%, 50%) of the row container.                  */}
+      {/* Spine dot */}
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={inView ? { scale: 1, opacity: 1 } : {}}
@@ -218,6 +248,22 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         </div>
       </motion.div>
     </div>
+  );
+}
+
+// ─── Responsive Timeline Row ─────────────────────────────────────────────────
+function TimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+  return (
+    <>
+      {/* Mobile: single column */}
+      <div className="md:hidden">
+        <MobileTimelineRow milestone={milestone} index={index} />
+      </div>
+      {/* Desktop: alternating two-column */}
+      <div className="hidden md:block">
+        <DesktopTimelineRow milestone={milestone} index={index} />
+      </div>
+    </>
   );
 }
 
@@ -399,14 +445,14 @@ export default function Education() {
       {/* Timeline */}
       <div className="relative max-w-5xl mx-auto">
 
-        {/* Vertical spine */}
+        {/* Vertical spine — left on mobile, center on desktop */}
         <motion.div
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1.4, ease: 'easeInOut' }}
           style={{ originY: 0 }}
-          className="absolute left-1/2 -translate-x-1/2 inset-y-0 w-px pointer-events-none"
+          className="absolute left-[10px] md:left-1/2 md:-translate-x-1/2 inset-y-0 w-px pointer-events-none"
         >
           <div className="w-full h-full" style={{ backgroundImage: spineGradient }} />
         </motion.div>
@@ -417,7 +463,7 @@ export default function Education() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex justify-center mb-12"
+          className="flex justify-start pl-[4px] md:justify-center md:pl-0 mb-12"
         >
           <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
             <path
@@ -431,7 +477,7 @@ export default function Education() {
         </motion.div>
 
         {/* Cards + comet trail */}
-        <div className="flex flex-col gap-20">
+        <div className="flex flex-col gap-12 md:gap-20">
           {milestones.map((m, i) => (
             <TimelineRow key={i} milestone={m} index={i} />
           ))}

@@ -7,6 +7,7 @@ import CompetitiveProgramming from '@/components/CompetitiveProgramming';
 import Certificates from '@/components/Certificates';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
+import BackToTop from '@/components/BackToTop';
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <Certificates />
       <Contact />
       <Footer />
+      <BackToTop />
     </main>
   );
 }
