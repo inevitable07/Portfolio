@@ -42,7 +42,7 @@ export async function PUT(
       updates.thumbnail = result.url;
     }
 
-    const certificate = await Certificate.findByIdAndUpdate(id, updates, { new: true }).lean();
+    const certificate = await Certificate.findByIdAndUpdate(id, updates, { returnDocument: 'after' }).lean();
     if (!certificate) {
       return NextResponse.json({ error: 'Certificate not found' }, { status: 404 });
     }

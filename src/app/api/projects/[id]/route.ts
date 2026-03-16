@@ -61,7 +61,7 @@ export async function PUT(
       updates.thumbnail = result.url;
     }
 
-    const project = await Project.findByIdAndUpdate(id, updates, { new: true }).lean();
+    const project = await Project.findByIdAndUpdate(id, updates, { returnDocument: 'after' }).lean();
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }

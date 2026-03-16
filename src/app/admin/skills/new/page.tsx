@@ -10,6 +10,7 @@ export default function NewSkill() {
 
   const [name, setName] = useState('');
   const [order, setOrder] = useState(1);
+  const [category, setCategory] = useState<'technical' | 'soft'>('technical');
   const [icon, setIcon] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,6 +22,7 @@ export default function NewSkill() {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('order', String(order));
+      formData.append('category', category);
       if (icon) formData.append('icon', icon);
 
       const res = await fetch('/api/skills', { method: 'POST', body: formData });
@@ -55,6 +57,19 @@ export default function NewSkill() {
         <div>
           <label className="block text-xs text-white/40 mb-1.5">Order</label>
           <input type="number" value={order} onChange={(e) => setOrder(Math.max(1, Number(e.target.value)))} min={1} className={inputCls} />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'technical' | 'soft')}
+            className={inputCls}
+          >
+            <option value="technical">Technical</option>
+            <option value="soft">Soft</option>
+          </select>
         </div>
 
         {/* Icon */}

@@ -14,6 +14,7 @@ export default function EditSkill() {
 
   const [name, setName] = useState('');
   const [order, setOrder] = useState(1);
+  const [category, setCategory] = useState<'technical' | 'soft'>('technical');
   const [currentIcon, setCurrentIcon] = useState('');
   const [icon, setIcon] = useState<File | null>(null);
 
@@ -27,6 +28,7 @@ export default function EditSkill() {
 
         setName(skill.name);
         setOrder(skill.order ?? 1);
+        setCategory(skill.category ?? 'technical');
         setCurrentIcon(skill.icon ?? '');
       } catch {
         setError('Failed to load skill');
@@ -46,6 +48,7 @@ export default function EditSkill() {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('order', String(order));
+      formData.append('category', category);
       if (icon) formData.append('icon', icon);
 
       const res = await fetch(`/api/skills/${id}`, { method: 'PUT', body: formData });
@@ -91,6 +94,19 @@ export default function EditSkill() {
         <div>
           <label className="block text-xs text-white/40 mb-1.5">Order</label>
           <input type="number" value={order} onChange={(e) => setOrder(Math.max(1, Number(e.target.value)))} min={1} className={inputCls} />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'technical' | 'soft')}
+            className={inputCls}
+          >
+            <option value="technical">Technical</option>
+            <option value="soft">Soft</option>
+          </select>
         </div>
 
         {/* Icon */}

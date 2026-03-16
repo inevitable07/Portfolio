@@ -21,6 +21,7 @@ export async function POST(request: Request) {
 
     const name = formData.get('name') as string;
     const order = parseInt((formData.get('order') as string) || '0', 10);
+    const category = (formData.get('category') as string) || 'technical';
     const file = formData.get('icon') as File | null;
 
     if (!name) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       icon = result.url;
     }
 
-    const skill = await Skill.create({ name, icon, order });
+    const skill = await Skill.create({ name, icon, order, category });
     return NextResponse.json(skill, { status: 201 });
   } catch (err) {
     console.error('[skills POST]', err);

@@ -9,6 +9,7 @@ interface SkillData {
   name: string;
   icon: string;
   order: number;
+  category: 'technical' | 'soft';
 }
 
 const fadeUp = {
@@ -60,7 +61,6 @@ function CardSkeleton() {
 export default function Skills() {
   const headerRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(headerRef, { once: true });
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,18 +137,36 @@ export default function Skills() {
           <p className="text-lg">No skills yet</p>
         </div>
       ) : (
-        <motion.div
-          ref={gridRef}
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto"
-        >
-          {skills.map((skill) => (
-            <SkillCard key={skill._id} skill={skill} />
-          ))}
-        </motion.div>
+        <div className="max-w-6xl mx-auto space-y-14">
+          {(['technical', 'soft'] as const).map((cat) => {
+            const group = skills.filter((s) => (s.category ?? 'technical') === cat);
+            if (group.length === 0) return null;
+            return (
+              <div key={cat}>
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45 }}
+                  className="text-[11px] uppercase tracking-[0.35em] text-white/30 mb-6 font-light"
+                >
+                  {cat === 'technical' ? 'Technical Skills' : 'Soft Skills'}
+                </motion.p>
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-40px' }}
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                >
+                  {group.map((skill) => (
+                    <SkillCard key={skill._id} skill={skill} />
+                  ))}
+                </motion.div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </section>
   );
