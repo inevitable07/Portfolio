@@ -50,23 +50,23 @@ export default function LoadingScreen({ onComplete }: Props) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6"
       style={{ backgroundColor: '#121212' }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, ease: 'easeInOut' }}
     >
-      {/* Load image */}
-      <div className="mb-10">
+      {/* Load image — same responsive width as progress bar */}
+      <div className="mb-8 sm:mb-10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/load.jpeg"
           alt=""
-          className="w-28 h-28 sm:w-36 sm:h-36 object-contain"
+          className="w-[52vw] sm:w-[32vw] md:w-[26vw] lg:w-[16vw] max-w-[240px] h-auto"
         />
       </div>
 
-      {/* Progress bar */}
-      <div className="w-40 sm:w-56 h-px bg-white/10 relative mb-3">
+      {/* Progress bar — matches image width */}
+      <div className="w-[52vw] sm:w-[32vw] md:w-[26vw] lg:w-[16vw] max-w-[240px] h-px bg-white/10 relative mb-3">
         <div
           className="absolute inset-y-0 left-0 bg-white/50"
           style={{ width: `${progress}%`, transition: 'width 30ms linear' }}
@@ -74,7 +74,7 @@ export default function LoadingScreen({ onComplete }: Props) {
       </div>
 
       {/* Percentage */}
-      <p className="text-white/25 text-[11px] tracking-[0.35em] font-light tabular-nums">
+      <p className="text-white/25 text-[10px] sm:text-[11px] tracking-[0.35em] font-light tabular-nums">
         {String(progress).padStart(3, '0')}
       </p>
     </motion.div>

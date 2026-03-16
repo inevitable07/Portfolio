@@ -16,6 +16,7 @@ export default function Navbar() {
   const [visible, setVisible] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [inHero, setInHero] = useState(true);
+  const [nearFooter, setNearFooter] = useState(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pastHeroRef = useRef(false);
 
@@ -68,6 +69,18 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
+  // Hide mobile nav when the footer enters the viewport
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setNearFooter(entry.isIntersecting),
+      { threshold: 0.05 },
+    );
+    io.observe(footer);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <>
       {/* ── Desktop top navbar ─────────────────────────────────────────── */}
@@ -113,14 +126,14 @@ export default function Navbar() {
         </nav>
       </motion.header>
 
-      {/* ── Mobile bottom nav bar — always visible EXCEPT during hero ── */}
+      {/* ── Mobile bottom nav bar — always visible EXCEPT during hero or footer ── */}
       <motion.nav
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: inHero ? 0 : 1, y: inHero ? 20 : 0 }}
+        animate={{ opacity: (inHero || nearFooter) ? 0 : 1, y: (inHero || nearFooter) ? 20 : 0 }}
         transition={{ duration: 0.35, ease: 'easeInOut' }}
         style={{
-          pointerEvents: inHero ? 'none' : 'auto',
+          pointerEvents: (inHero || nearFooter) ? 'none' : 'auto',
           backgroundColor: 'rgba(10,10,10,0.92)',
           backdropFilter: 'blur(16px)',
           borderTop: '1px solid rgba(255,255,255,0.06)',

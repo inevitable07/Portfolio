@@ -181,7 +181,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
           />
           <div
             className="absolute inset-0 z-10 pointer-events-none lg:hidden"
-            style={{ background: 'linear-gradient(to bottom, transparent 60%, #121212 100%)' }}
+            style={{ background: 'linear-gradient(to bottom, transparent 88%, #121212 100%)' }}
           />
           <video
             ref={videoRef}
@@ -191,7 +191,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
             preload="auto"
             className={[
               'absolute inset-0 w-full h-full object-cover',
-              isDesktop ? 'object-[90%_top]' : 'object-center',
+              isDesktop ? 'object-[90%_top]' : 'object-[50%_30%]',
             ].join(' ')}
           >
             <source src={videoSrc} type="video/mp4" />
@@ -213,7 +213,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-2"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden lg:flex flex-col items-center gap-2"
           >
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">Scroll</span>
             <motion.div
