@@ -44,6 +44,10 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfterSec: number }
   return { allowed: true, retryAfterSec: 0 };
 }
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 export async function POST(request: Request) {
   // ── Rate limit check ────────────────────────────────────────────────────
   const ip = getClientIp(request);
@@ -105,22 +109,22 @@ export async function POST(request: Request) {
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0a;color:#f0f0f0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.07)">
           <div style="padding:28px 32px;border-bottom:1px solid rgba(255,255,255,0.07)">
             <p style="margin:0;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.3)">Portfolio Contact Form</p>
-            <h2 style="margin:8px 0 0;font-size:22px;font-weight:800;color:#fff">New message from ${name}</h2>
+            <h2 style="margin:8px 0 0;font-size:22px;font-weight:800;color:#fff">New message from ${escapeHtml(name)}</h2>
           </div>
           <div style="padding:28px 32px">
             <table style="width:100%;border-collapse:collapse">
               <tr>
                 <td style="padding:6px 0;font-size:11px;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.3);width:80px">Name</td>
-                <td style="padding:6px 0;font-size:14px;color:#fff">${name}</td>
+                <td style="padding:6px 0;font-size:14px;color:#fff">${escapeHtml(name)}</td>
               </tr>
               <tr>
                 <td style="padding:6px 0;font-size:11px;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.3)">Email</td>
-                <td style="padding:6px 0;font-size:14px;color:#fff"><a href="mailto:${email}" style="color:#f97316;text-decoration:none">${email}</a></td>
+                <td style="padding:6px 0;font-size:14px;color:#fff"><a href="mailto:${email}" style="color:#f97316;text-decoration:none">${escapeHtml(email)}</a></td>
               </tr>
             </table>
             <hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:20px 0"/>
             <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.3)">Message</p>
-            <p style="margin:0;font-size:14px;color:rgba(255,255,255,.75);line-height:1.7;white-space:pre-wrap">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+            <p style="margin:0;font-size:14px;color:rgba(255,255,255,.75);line-height:1.7;white-space:pre-wrap">${escapeHtml(message)}</p>
           </div>
           <div style="padding:16px 32px;background:rgba(255,255,255,0.03);font-size:11px;color:rgba(255,255,255,.2)">
             Sent from your portfolio contact form

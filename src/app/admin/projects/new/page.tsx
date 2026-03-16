@@ -83,8 +83,8 @@ export default function NewProject() {
             <input type="url" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} className={inputCls} placeholder="https://github.com/..." />
           </div>
           <div>
-            <label className="block text-xs text-white/40 mb-1.5">Live Demo Link</label>
-            <input type="url" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} className={inputCls} placeholder="https://..." />
+            <label className="block text-xs text-white/40 mb-1.5">Live Demo Link <span className="text-white/20">(optional)</span></label>
+            <input type="url" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} className={inputCls} placeholder="https://... — leave empty to hide the icon" />
           </div>
         </div>
 

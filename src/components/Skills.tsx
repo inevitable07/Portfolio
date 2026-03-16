@@ -3,12 +3,15 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface SkillData {
   _id: string;
   name: string;
   icon: string;
   order: number;
+  category: 'technical' | 'soft';
+  featured?: boolean;
 }
 
 const fadeUp = {
@@ -26,7 +29,7 @@ function SkillCard({ skill }: { skill: SkillData }) {
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center hover:border-white/[0.13] transition-colors duration-300"
+      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center hover:border-emerald-500/[0.25] hover:shadow-[0_0_22px_rgba(16,185,129,0.12)] transition-all duration-300"
     >
       <div className="w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden bg-white/[0.05] flex items-center justify-center">
         {skill.icon ? (
@@ -60,14 +63,13 @@ function CardSkeleton() {
 export default function Skills() {
   const headerRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(headerRef, { once: true });
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSkills = useCallback(async () => {
     try {
-      const res = await fetch('/api/skills');
+      const res = await fetch('/api/skills?featured=true');
       const data = await res.json();
       setSkills(Array.isArray(data) ? data : []);
     } catch {
@@ -137,17 +139,56 @@ export default function Skills() {
           <p className="text-lg">No skills yet</p>
         </div>
       ) : (
+        <div className="max-w-6xl mx-auto space-y-14">
+          {(['technical', 'soft'] as const).map((cat) => {
+            const group = skills.filter((s) => (s.category ?? 'technical') === cat);
+            if (group.length === 0) return null;
+            return (
+              <div key={cat}>
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45 }}
+                  className="text-[11px] uppercase tracking-[0.35em] text-white/30 mb-6 font-light"
+                >
+                  {cat === 'technical' ? 'Technical Skills' : 'Soft Skills'}
+                </motion.p>
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-40px' }}
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                >
+                  {group.map((skill) => (
+                    <SkillCard key={skill._id} skill={skill} />
+                  ))}
+                </motion.div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* View All CTA — only when filling at least one full row (5 cols on lg) */}
+      {!loading && skills.length >= 5 && (
         <motion.div
-          ref={gridRef}
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-12 flex justify-center"
         >
-          {skills.map((skill) => (
-            <SkillCard key={skill._id} skill={skill} />
-          ))}
+          <Link
+            href="/skills"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-white/[0.12] text-white/60 text-sm font-medium hover:text-white hover:border-white/25 transition-all duration-300"
+          >
+            View All Skills
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
         </motion.div>
       )}
     </section>

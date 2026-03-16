@@ -7,10 +7,10 @@ import { motion, useInView } from 'framer-motion';
 const milestones = [
   {
     year: '2019 - 2020',
-    title: 'Secondary Education',
+    title: 'Matriculation',
     institution: 'Rose Bud Academy, Khagaria, Bihar',
     description:
-      'Completed schooling with a focus on Science and Mathematics. Developed a strong analytical foundation and first exposure to programming through computer science electives.',
+      'Completed secondary education with a strong academic focus on core subjects including Science and Mathematics. ',
     grade: '88.40%',
     side: 'right' as const,
     icon: '/education/rose-bud.png',
@@ -30,10 +30,10 @@ const milestones = [
   },
   {
     year: '2020 - 2022',
-    title: 'Higher Secondary Education',
+    title: 'Intermediate',
     institution: 'R.B College, Dalsingh Sarai, Bihar',
     description:
-      'Graduated with honours in Computer Science. Specialised in cloud infrastructure and distributed systems. Led the university DevOps club, organising workshops on CI/CD pipelines, containerisation, and infrastructure-as-code.',
+      'Completed higher secondary education in the Science stream, strengthening my understanding of core subjects and preparing for higher studies.',
     grade: '83.00%',
     side: 'left' as const,
     icon: '/education/rb-college.png',
@@ -56,7 +56,7 @@ const milestones = [
     title: 'B.Tech - Computer Science & Engineering',
     institution: 'Lovely Professional University, Phagwara, Punjab',
     description:
-      'Earned AWS Solutions Architect Associate, Terraform Associate, and Certified Kubernetes Administrator (CKA) certifications. Continuously upskilling through hands-on projects and open-source contributions.',
+      'Pursuing a Bachelor’s degree in Computer Science and Engineering while actively building projects and exploring modern technologies in software development, cloud computing, and DevOps practices.',
     grade: 'CGPA 8.29',
     side: 'right' as const,
     icon: '/education/lpu.jpg',
@@ -138,8 +138,46 @@ function CardContent({ milestone }: { milestone: Milestone }) {
   );
 }
 
-// ─── Timeline Row ─────────────────────────────────────────────────────────────
-function TimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+// ─── Mobile Timeline Row (single column, spine on left) ──────────────────────
+function MobileTimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const { accent } = milestone;
+
+  return (
+    <div ref={ref} className="relative flex items-start gap-4 pl-8">
+      {/* Spine dot — left edge */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={inView ? { scale: 1, opacity: 1 } : {}}
+        transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
+        className="absolute left-0 top-6 z-10"
+      >
+        <div
+          className="w-5 h-5 rounded-full bg-[#0a0a0a] flex items-center justify-center border"
+          style={{ borderColor: accent.dot + '66', boxShadow: `0 0 10px ${accent.dotGlow}` }}
+        >
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accent.dot }} />
+        </div>
+      </motion.div>
+
+      {/* Card */}
+      <motion.div
+        initial={{ opacity: 0, x: 24 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.6, delay: index * 0.1, ease: 'easeOut' }}
+        className="w-full"
+      >
+        <div className="rounded-xl border p-5" style={{ backgroundImage: accent.grad, borderColor: accent.border }}>
+          <CardContent milestone={milestone} />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Desktop Timeline Row (alternating two-column) ───────────────────────────
+function DesktopTimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const isLeft = milestone.side === 'left';
@@ -148,21 +186,21 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
   return (
     <div ref={ref} className="relative grid grid-cols-2 items-center">
 
-      {/* ── Connector line – ROW-level absolute so top-1/2 = same reference as the dot ── */}
-      {/*   z-0 so the dot (z-10) sits ON TOP of the line, giving "line through dot" look   */}
+      {/* Connector line */}
       <div
-        className="absolute top-1/2 h-px w-12 -translate-y-1/2 z-0 pointer-events-none"
+        className="absolute z-0 pointer-events-none"
         style={{
-          // Left card: line goes from card-right-edge (50%-3rem) → spine (50%)
-          // Right card: line goes from spine (50%) → card-left-edge (50%+3rem)
-          left: isLeft ? 'calc(50% - 3rem)' : '50%',
+          height: 1,
+          top: 'calc(50% - 0.5px)',
+          left:  isLeft ? 'calc(50% - 3rem)'       : 'calc(50% - 10px)',
+          width: isLeft ? 'calc(3rem + 10px)'      : 'calc(3rem + 10px)',
           backgroundImage: isLeft
             ? `linear-gradient(to right, transparent 0%, ${accent.connector} 100%)`
-            : `linear-gradient(to left, transparent 0%, ${accent.connector} 100%)`,
+            : `linear-gradient(to left,  transparent 0%, ${accent.connector} 100%)`,
         }}
       />
 
-      {/* ── Left column ── */}
+      {/* Left column */}
       <div className="flex items-center justify-end pr-12">
         {isLeft && (
           <motion.div
@@ -178,7 +216,7 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         )}
       </div>
 
-      {/* ── Right column ── */}
+      {/* Right column */}
       <div className="flex items-center justify-start pl-12">
         {!isLeft && (
           <motion.div
@@ -194,12 +232,13 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         )}
       </div>
 
-      {/* ── Spine dot – z-10 so it renders on top of the connector line ── */}
+      {/* Spine dot */}
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={inView ? { scale: 1, opacity: 1 } : {}}
         transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+        className="absolute z-10"
+        style={{ left: 'calc(50% - 10px)', top: 'calc(50% - 10px)' }}
       >
         <div
           className="w-5 h-5 rounded-full bg-[#0a0a0a] flex items-center justify-center border"
@@ -209,6 +248,22 @@ function TimelineRow({ milestone, index }: { milestone: Milestone; index: number
         </div>
       </motion.div>
     </div>
+  );
+}
+
+// ─── Responsive Timeline Row ─────────────────────────────────────────────────
+function TimelineRow({ milestone, index }: { milestone: Milestone; index: number }) {
+  return (
+    <>
+      {/* Mobile: single column */}
+      <div className="md:hidden">
+        <MobileTimelineRow milestone={milestone} index={index} />
+      </div>
+      {/* Desktop: alternating two-column */}
+      <div className="hidden md:block">
+        <DesktopTimelineRow milestone={milestone} index={index} />
+      </div>
+    </>
   );
 }
 
@@ -390,14 +445,14 @@ export default function Education() {
       {/* Timeline */}
       <div className="relative max-w-5xl mx-auto">
 
-        {/* Vertical spine */}
+        {/* Vertical spine — left on mobile, center on desktop */}
         <motion.div
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1.4, ease: 'easeInOut' }}
           style={{ originY: 0 }}
-          className="absolute left-1/2 -translate-x-1/2 inset-y-0 w-px pointer-events-none"
+          className="absolute left-[10px] md:left-1/2 md:-translate-x-1/2 inset-y-0 w-px pointer-events-none"
         >
           <div className="w-full h-full" style={{ backgroundImage: spineGradient }} />
         </motion.div>
@@ -408,7 +463,7 @@ export default function Education() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex justify-center mb-12"
+          className="flex justify-start pl-[4px] md:justify-center md:pl-0 mb-12"
         >
           <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
             <path
@@ -422,7 +477,7 @@ export default function Education() {
         </motion.div>
 
         {/* Cards + comet trail */}
-        <div className="flex flex-col gap-20">
+        <div className="flex flex-col gap-12 md:gap-20">
           {milestones.map((m, i) => (
             <TimelineRow key={i} milestone={m} index={i} />
           ))}

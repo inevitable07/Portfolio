@@ -9,6 +9,7 @@ interface CertificateItem {
   thumbnail: string;
   certificateLink: string;
   order: number;
+  featured?: boolean;
 }
 
 export default function AdminCertificates() {
@@ -87,7 +88,14 @@ export default function AdminCertificates() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{c.name}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-sm font-medium text-white truncate">{c.name}</p>
+                  {(c.featured ?? true) && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 bg-amber-500/10 text-amber-400/70">
+                      Featured
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   {c.certificateLink && (
                     <span className="text-[10px] text-white/30 truncate max-w-[200px]">{c.certificateLink}</span>

@@ -5,6 +5,7 @@ export interface ICertificate extends Document {
   thumbnail: string;
   certificateLink: string;
   order: number;
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,6 +16,7 @@ const CertificateSchema = new Schema<ICertificate>(
     thumbnail: { type: String, default: '' },
     certificateLink: { type: String, default: '' },
     order: { type: Number, default: 0 },
+    featured: { type: Boolean, default: true },
   },
   { timestamps: true },
 );

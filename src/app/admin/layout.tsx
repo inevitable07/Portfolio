@@ -9,32 +9,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Skip auth check on the login page
     if (pathname === '/admin/login') {
       setChecked(true);
       return;
     }
 
-    const token = document.cookie
-      .split('; ')
-      .find((c) => c.startsWith('admin_token='))
-      ?.split('=')[1];
-
-    if (!token) {
-      router.replace('/admin/login');
-    } else {
-      setChecked(true);
-    }
+    fetch('/api/admin/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setChecked(true);
+        } else {
+          router.replace('/admin/login');
+        }
+      })
+      .catch(() => router.replace('/admin/login'));
   }, [pathname, router]);
 
   // Login page renders directly without the admin shell
   if (pathname === '/admin/login') return <>{children}</>;
 
-  // Show nothing while checking auth
   if (!checked) return null;
 
-  const handleLogout = () => {
-    document.cookie = 'admin_token=; path=/; max-age=0';
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
   };
 

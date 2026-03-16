@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Certificate from '@/models/Certificate';
 import { uploadImage, deleteImage } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth';
 
 function extractPublicId(url: string): string | null {
   const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
@@ -12,6 +13,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();
@@ -22,11 +26,13 @@ export async function PUT(
     const name = formData.get('name') as string | null;
     const certificateLink = formData.get('certificateLink') as string | null;
     const order = formData.get('order') as string | null;
+    const featuredRaw = formData.get('featured') as string | null;
     const file = formData.get('thumbnail') as File | null;
 
     if (name !== null) updates.name = name;
     if (certificateLink !== null) updates.certificateLink = certificateLink;
     if (order !== null) updates.order = parseInt(order, 10);
+    if (featuredRaw !== null) updates.featured = featuredRaw !== 'false';
 
     if (file && file.size > 0) {
       const existing = await Certificate.findById(id).lean();
@@ -42,7 +48,7 @@ export async function PUT(
       updates.thumbnail = result.url;
     }
 
-    const certificate = await Certificate.findByIdAndUpdate(id, updates, { new: true }).lean();
+    const certificate = await Certificate.findByIdAndUpdate(id, updates, { returnDocument: 'after' }).lean();
     if (!certificate) {
       return NextResponse.json({ error: 'Certificate not found' }, { status: 404 });
     }
@@ -58,6 +64,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     await connectDB();

@@ -324,7 +324,7 @@ export default function CompetitiveProgramming() {
           initial={{ opacity: 0, y: 20 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.55, delay: 0.07 }}
-          className="text-4xl sm:text-5xl md:text-[4.5rem] font-black text-white leading-none tracking-[-0.03em] mb-4"
+          className="text-3xl sm:text-5xl md:text-[4.5rem] font-black text-white leading-none tracking-[-0.03em] mb-4"
         >
           Competitive Programming<span className="text-white/15">.</span>
         </motion.h2>

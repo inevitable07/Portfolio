@@ -11,6 +11,7 @@ export default function NewCertificate() {
   const [name, setName] = useState('');
   const [certificateLink, setCertificateLink] = useState('');
   const [order, setOrder] = useState(1);
+  const [featured, setFeatured] = useState(true);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,6 +24,7 @@ export default function NewCertificate() {
       formData.append('name', name);
       formData.append('certificateLink', certificateLink);
       formData.append('order', String(order));
+      formData.append('featured', String(featured));
       if (thumbnail) formData.append('thumbnail', thumbnail);
 
       const res = await fetch('/api/certificates', { method: 'POST', body: formData });
@@ -57,6 +59,18 @@ export default function NewCertificate() {
         <div>
           <label className="block text-xs text-white/40 mb-1.5">Certificate Link</label>
           <input type="url" value={certificateLink} onChange={(e) => setCertificateLink(e.target.value)} className={inputCls} placeholder="https://..." />
+        </div>
+
+        {/* Featured */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFeatured((v) => !v)}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ${featured ? 'bg-emerald-500/70' : 'bg-white/10'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${featured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+          <span className="text-xs text-white/50">Featured — show on homepage</span>
         </div>
 
         {/* Order */}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { COLOR_THEMES } from '@/lib/colorThemes';
 import ProjectDetailWindow, { type ProjectData } from '@/components/ProjectDetailWindow';
 
@@ -57,8 +58,11 @@ function ProjectCard({
       transition={{ duration: 0.6 }}
       whileHover={{ y: -6, scale: 1.015 }}
       onClick={onClick}
-      className="group relative aspect-[16/10] rounded-2xl overflow-hidden border cursor-pointer transition-all duration-500"
-      style={{ willChange: 'transform, opacity', borderColor: accent.ring }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      role="button"
+      tabIndex={0}
+      className="group relative aspect-[16/10] rounded-2xl overflow-hidden border cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+      style={{ borderColor: accent.ring }}
       onHoverStart={() => {
         if (cardRef.current) {
           cardRef.current.style.boxShadow = `0 8px 40px ${accent.ring}, 0 0 0 1px ${accent.ring}`;
@@ -138,7 +142,7 @@ export default function Projects() {
 
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await fetch('/api/projects');
+      const res = await fetch('/api/projects?featured=true');
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setProjects(Array.isArray(data) ? data : []);
@@ -235,6 +239,27 @@ export default function Projects() {
               onClick={() => setSelectedProject(project)}
             />
           ))}
+        </motion.div>
+      )}
+
+      {/* View All CTA — only when filling at least one full row (2 cols on md) */}
+      {!loading && projects.length >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-10 flex justify-center"
+        >
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-full border border-white/[0.12] text-white/60 text-sm font-medium hover:text-white hover:border-white/25 transition-all duration-300"
+          >
+            View All Projects
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
         </motion.div>
       )}
 

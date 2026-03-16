@@ -14,6 +14,8 @@ export default function EditSkill() {
 
   const [name, setName] = useState('');
   const [order, setOrder] = useState(1);
+  const [category, setCategory] = useState<'technical' | 'soft'>('technical');
+  const [featured, setFeatured] = useState(true);
   const [currentIcon, setCurrentIcon] = useState('');
   const [icon, setIcon] = useState<File | null>(null);
 
@@ -27,6 +29,8 @@ export default function EditSkill() {
 
         setName(skill.name);
         setOrder(skill.order ?? 1);
+        setCategory(skill.category ?? 'technical');
+        setFeatured(skill.featured ?? true);
         setCurrentIcon(skill.icon ?? '');
       } catch {
         setError('Failed to load skill');
@@ -46,6 +50,8 @@ export default function EditSkill() {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('order', String(order));
+      formData.append('category', category);
+      formData.append('featured', String(featured));
       if (icon) formData.append('icon', icon);
 
       const res = await fetch(`/api/skills/${id}`, { method: 'PUT', body: formData });
@@ -91,6 +97,31 @@ export default function EditSkill() {
         <div>
           <label className="block text-xs text-white/40 mb-1.5">Order</label>
           <input type="number" value={order} onChange={(e) => setOrder(Math.max(1, Number(e.target.value)))} min={1} className={inputCls} />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-xs text-white/40 mb-1.5">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'technical' | 'soft')}
+            className={inputCls}
+          >
+            <option value="technical">Technical</option>
+            <option value="soft">Soft</option>
+          </select>
+        </div>
+
+        {/* Featured */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setFeatured((v) => !v)}
+            className={`relative w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ${featured ? 'bg-emerald-500/70' : 'bg-white/10'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${featured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+          <span className="text-xs text-white/50">Featured — show on homepage</span>
         </div>
 
         {/* Icon */}

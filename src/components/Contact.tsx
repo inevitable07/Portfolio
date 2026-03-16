@@ -187,48 +187,54 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {/* Name */}
               <motion.div variants={fadeUp}>
-                <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
+                <label htmlFor="contact-name" className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
                   Name
                 </label>
                 <input
+                  id="contact-name"
                   type="text"
                   name="name"
                   required
                   placeholder="Your name"
                   value={form.name}
                   onChange={handleChange}
+                  disabled={sending}
                   className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all duration-200"
                 />
               </motion.div>
 
               {/* Email */}
               <motion.div variants={fadeUp}>
-                <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
+                <label htmlFor="contact-email" className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
                   Email
                 </label>
                 <input
+                  id="contact-email"
                   type="email"
                   name="email"
                   required
                   placeholder="your.email@example.com"
                   value={form.email}
                   onChange={handleChange}
+                  disabled={sending}
                   className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all duration-200"
                 />
               </motion.div>
 
               {/* Message */}
               <motion.div variants={fadeUp}>
-                <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
+                <label htmlFor="contact-message" className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-2">
                   Message
                 </label>
                 <textarea
+                  id="contact-message"
                   name="message"
                   required
                   rows={5}
                   placeholder="Your message..."
                   value={form.message}
                   onChange={handleChange}
+                  disabled={sending}
                   className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all duration-200 resize-none"
                 />
               </motion.div>
@@ -319,7 +325,7 @@ export default function Contact() {
               </p>
               <div className="flex gap-3">
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/AashishBhaskar3"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.04] flex items-center justify-center text-white/35 hover:text-white hover:border-white/20 transition-all duration-200"
@@ -330,7 +336,7 @@ export default function Contact() {
                   </svg>
                 </a>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/in/aashishbhaskar/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.04] flex items-center justify-center text-white/35 hover:text-white hover:border-white/20 transition-all duration-200"

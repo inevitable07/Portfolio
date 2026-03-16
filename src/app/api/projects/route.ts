@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { uploadImage } from '@/lib/cloudinary';
+import { requireAdmin } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const projects = await Project.find({}).sort({ order: 1, createdAt: -1 }).lean();
+    const { searchParams } = new URL(request.url);
+    const filter = searchParams.get('featured') === 'true' ? { featured: true } : {};
+    const projects = await Project.find(filter).sort({ order: 1, createdAt: -1 }).lean();
     return NextResponse.json(projects);
   } catch (err) {
     console.error('[projects GET]', err);
@@ -15,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     await connectDB();
     const formData = await request.formData();
