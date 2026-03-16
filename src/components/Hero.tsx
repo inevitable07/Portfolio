@@ -22,14 +22,15 @@ const lineVariants = {
 
 // ─── Inner component — receives the already-detected videoSrc ────────────────
 function HeroContent({ videoSrc }: { videoSrc: string }) {
+  const hasVideo = Boolean(videoSrc);
   const videoRef = useRef<HTMLVideoElement>(null);
   const textRevealedRef = useRef(false);
-  const [textVisible, setTextVisible] = useState(false);
+  const [textVisible, setTextVisible] = useState(!hasVideo);
   const [scrollHint, setScrollHint] = useState(false);
 
-  const isDesktop = !videoSrc.includes('smallScreen');
-
   useEffect(() => {
+    if (!hasVideo) return; // no video on mobile — text already visible
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -88,7 +89,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
       className="relative w-full min-h-screen"
       style={{ backgroundColor: '#121212' }}
     >
-      <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[45%_55%] min-h-screen lg:h-screen">
+      <div className={`relative z-10 w-full grid grid-cols-1 ${hasVideo ? 'lg:grid-cols-[45%_55%]' : ''} min-h-screen lg:h-screen`}>
 
         {/* Logo */}
         <a
@@ -107,7 +108,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
               <motion.div
                 key="hero-text"
                 variants={containerVariants}
-                initial="hidden"
+                initial={hasVideo ? 'hidden' : 'visible'}
                 animate="visible"
                 className="text-center lg:text-left"
               >
@@ -173,15 +174,12 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
           </AnimatePresence>
         </div>
 
-        {/* RIGHT — video */}
+        {/* RIGHT — video (desktop only) */}
+        {hasVideo && (
         <div className="order-1 lg:order-2 relative w-full h-[80vh] sm:h-[75vh] md:h-[80vh] lg:h-full flex items-center justify-center overflow-hidden">
           <div
             className="absolute inset-0 z-10 pointer-events-none hidden lg:block"
             style={{ background: 'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)' }}
-          />
-          <div
-            className="absolute inset-0 z-10 pointer-events-none lg:hidden"
-            style={{ background: 'linear-gradient(to bottom, transparent 60%, #121212 100%)' }}
           />
           <video
             ref={videoRef}
@@ -189,14 +187,12 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
             playsInline
             poster="/hero-poster.png"
             preload="auto"
-            className={[
-              'absolute inset-0 w-full h-full object-cover',
-              isDesktop ? 'object-[90%_top]' : 'object-center',
-            ].join(' ')}
+            className="absolute inset-0 w-full h-full object-cover object-[90%_top]"
           >
             <source src={videoSrc} type="video/mp4" />
           </video>
         </div>
+        )}
       </div>
 
       {/* Bottom vignette */}
@@ -213,7 +209,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-2"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden lg:flex flex-col items-center gap-2"
           >
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">Scroll</span>
             <motion.div
