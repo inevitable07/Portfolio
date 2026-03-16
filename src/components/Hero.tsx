@@ -234,12 +234,12 @@ export default function Hero() {
 
   return (
     <>
-      {/* Hero content renders underneath loading screen, starts when src is known */}
-      {videoSrc && <HeroContent videoSrc={videoSrc} />}
+      {/* Hero renders as soon as loading completes (videoSrc is no longer null) */}
+      {videoSrc !== null && <HeroContent videoSrc={videoSrc} />}
 
-      {/* Loading screen sits on top as a fixed overlay, fades out when done */}
+      {/* Loading screen as fixed overlay — exits once videoSrc is set */}
       <AnimatePresence>
-        {!videoSrc && (
+        {videoSrc === null && (
           <LoadingScreen onComplete={setVideoSrc} />
         )}
       </AnimatePresence>
