@@ -125,8 +125,8 @@ export default function EditProject() {
             <input type="url" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} className={inputCls} />
           </div>
           <div>
-            <label className="block text-xs text-white/40 mb-1.5">Live Demo Link</label>
-            <input type="url" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} className={inputCls} />
+            <label className="block text-xs text-white/40 mb-1.5">Live Demo Link <span className="text-white/20">(optional)</span></label>
+            <input type="url" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} className={inputCls} placeholder="Leave empty to hide the live link icon" />
           </div>
         </div>
 
