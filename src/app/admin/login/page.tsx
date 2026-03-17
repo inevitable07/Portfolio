@@ -26,7 +26,7 @@ export default function AdminLogin() {
         return;
       }
 
-      router.push('/admin/projects');
+      router.push('/admin');
     } catch {
       setError('Something went wrong');
     } finally {

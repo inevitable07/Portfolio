@@ -266,8 +266,7 @@ export default function CompetitiveProgramming() {
     setFetchError(null);
 
     try {
-      const suffix = manual ? `?ts=${Date.now()}` : '';
-      const res = await fetch(`/api/codolio${suffix}`, { cache: 'no-store' });
+      const res = await fetch(`/api/codolio?ts=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const d: CPData = await res.json();
       setData(d);

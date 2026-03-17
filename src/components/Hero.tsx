@@ -29,7 +29,7 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
   const [scrollHint, setScrollHint] = useState(false);
 
   useEffect(() => {
-    if (!hasVideo) return; // no video on mobile — text already visible
+    if (!hasVideo) return;
 
     const video = videoRef.current;
     if (!video) return;
@@ -46,6 +46,11 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
 
     const onEnded = () => {
       setScrollHint(true);
+      // Ensure text is visible even if video was shorter than 1.3 s
+      if (!textRevealedRef.current) {
+        textRevealedRef.current = true;
+        setTextVisible(true);
+      }
       video.loop = true;
       video.play().catch(() => {});
     };
@@ -86,23 +91,82 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
   return (
     <section
       id="hero"
-      className="relative w-full min-h-screen"
+      className="relative"
       style={{ backgroundColor: '#121212' }}
     >
-      <div className={`relative z-10 w-full grid grid-cols-1 ${hasVideo ? 'lg:grid-cols-[45%_55%]' : ''} min-h-screen lg:h-screen`}>
+      {/* Logo */}
+      <a
+        href="/admin"
+        className="absolute top-6 left-6 sm:left-8 lg:left-10 z-20"
+        aria-label="Admin Portal"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
+      </a>
 
-        {/* Logo */}
-        <a
-          href="/admin"
-          className="absolute top-6 left-6 sm:left-8 lg:left-10 z-20"
-          aria-label="Admin Portal"
+      {/*
+       * VIDEO ELEMENT
+       * ─ Mobile  (<lg): in normal flow, h-screen — sits above the text section
+       * ─ Desktop (lg+): absolute, covers the right 55% column behind the text
+       */}
+      {hasVideo && (
+        <div className="relative h-screen lg:absolute lg:inset-y-0 lg:left-[45%] lg:right-0 lg:h-auto z-0 overflow-hidden">
+          {/* Mobile: fade the bottom of the video into the page background */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-48 pointer-events-none z-10 lg:hidden"
+            style={{ background: 'linear-gradient(to top, #121212 0%, transparent 100%)' }}
+          />
+          {/* Desktop: fade the left edge of the right column */}
+          <div
+            className="absolute inset-0 pointer-events-none z-10 hidden lg:block"
+            style={{ background: 'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)' }}
+          />
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            poster="/hero-poster.png"
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover object-center lg:object-[90%_top]"
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+
+          {/* Scroll hint — mobile only, sits at the bottom of the video viewport */}
+          <AnimatePresence>
+            {scrollHint && (
+              <motion.div
+                key="scroll-hint-mobile"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="lg:hidden absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+              >
+                <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">Scroll</span>
+                <motion.div
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-5 h-5 flex items-center justify-center"
+                >
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className="text-white/30">
+                    <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/*
+       * HERO TEXT
+       * ─ Mobile: flows naturally below the video block, centred, padded
+       * ─ Desktop: h-screen tall, left 45% column, left-aligned
+       */}
+      <div className={`relative z-10 lg:h-screen flex items-center ${hasVideo ? 'lg:justify-start' : 'justify-center'}`}>
+        <div
+          className={`${hasVideo ? 'lg:w-[45%]' : ''} w-full flex flex-col items-center lg:items-start justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-14 lg:py-0`}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
-        </a>
-
-        {/* LEFT — intro text */}
-        <div className="order-2 lg:order-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">
           <AnimatePresence>
             {textVisible && (
               <motion.div
@@ -173,43 +237,23 @@ function HeroContent({ videoSrc }: { videoSrc: string }) {
             )}
           </AnimatePresence>
         </div>
-
-        {/* RIGHT — video (desktop only) */}
-        {hasVideo && (
-        <div className="order-1 lg:order-2 relative w-full h-[80vh] sm:h-[75vh] md:h-[80vh] lg:h-full flex items-center justify-center overflow-hidden">
-          <div
-            className="absolute inset-0 z-10 pointer-events-none hidden lg:block"
-            style={{ background: 'linear-gradient(to right, #121212 0%, transparent 18%, transparent 100%)' }}
-          />
-          <video
-            ref={videoRef}
-            muted
-            playsInline
-            poster="/hero-poster.png"
-            preload="auto"
-            className="absolute inset-0 w-full h-full object-cover object-[90%_top]"
-          >
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-        </div>
-        )}
       </div>
 
-      {/* Bottom vignette */}
+      {/* Bottom vignette — desktop only (section = h-screen, so this blends into next section) */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none"
+        className="hidden lg:block absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none"
         style={{ background: 'linear-gradient(to top, #121212 0%, transparent 100%)' }}
       />
 
-      {/* Scroll indicator — desktop only */}
+      {/* Scroll hint — desktop only */}
       <AnimatePresence>
         {scrollHint && (
           <motion.div
-            key="scroll-hint"
+            key="scroll-hint-desktop"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden lg:flex flex-col items-center gap-2"
+            className="hidden lg:flex absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex-col items-center gap-2"
           >
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/25 font-light">Scroll</span>
             <motion.div
@@ -234,10 +278,8 @@ export default function Hero() {
 
   return (
     <>
-      {/* Hero renders as soon as loading completes (videoSrc is no longer null) */}
       {videoSrc !== null && <HeroContent videoSrc={videoSrc} />}
 
-      {/* Loading screen as fixed overlay — exits once videoSrc is set */}
       <AnimatePresence>
         {videoSrc === null && (
           <LoadingScreen onComplete={setVideoSrc} />
