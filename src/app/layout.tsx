@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Creative Developer — Portfolio',
+  title: 'Aashish Bhaskar',
   description: 'Bridging design and engineering. Building high-performance digital experiences.',
   openGraph: {
-    title: 'Creative Developer — Portfolio',
+    title: 'Aashish Bhaskar',
     description: 'Bridging design and engineering.',
   },
 };
@@ -18,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `history.scrollRestoration='manual';window.scrollTo(0,0);` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
